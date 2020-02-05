@@ -26,7 +26,7 @@ class DeckActivity : AppCompatActivity() {
         setContentView(R.layout.activity_deck)
         val deck = getDecks().find { it.deckName == intent.getStringExtra("deck_info") }
         deckTitle.text = deck?.deckName
-        val onUpdate: () -> Unit = {
+        val onUpdate: (YugiohCard?) -> Unit = {
             mainDeck.swapAdapterWith<DeckAdapter, DeckAdapter.ViewHolder>(true) { da ->
                 DeckAdapter(this, deck!!.deck[DeckType.MAIN].deck, deck.deck, DeckType.MAIN, da.onUpdate)
             }
@@ -36,6 +36,7 @@ class DeckActivity : AppCompatActivity() {
             sideDeck.swapAdapterWith<DeckAdapter, DeckAdapter.ViewHolder>(true) { da ->
                 DeckAdapter(this, deck!!.deck[DeckType.SIDE].deck, deck.deck, DeckType.SIDE, da.onUpdate)
             }
+            it?.let { topCard -> deck?.topCard = topCard }
             val decks = getDecks()
             decks.removeIf { it.deckName == deck!!.deckName }
             decks.add(deck!!)
@@ -53,7 +54,7 @@ class DeckAdapter(
     list: List<YugiohCard>,
     private val fullDeck: YugiohDeck,
     private val type: DeckType,
-    val onUpdate: () -> Unit
+    val onUpdate: (YugiohCard?) -> Unit
 ) :
     DragSwipeAdapterTwo<YugiohCard, DeckAdapter.ViewHolder>(list.toMutableList()) {
 
@@ -75,7 +76,8 @@ class DeckAdapter(
         itemView.setOnLongClickListener {
             val whereTo = arrayOf(
                 "Remove",
-                if (type == DeckType.MAIN || type == DeckType.EXTRA) "Move to Side" else "Move to Main"
+                if (type == DeckType.MAIN || type == DeckType.EXTRA) "Move to Side" else "Move to Main",
+                "Make Top Card"
             )
             MaterialAlertDialogBuilder(context)
                 .setTitle("Remove or Move?")
@@ -83,14 +85,15 @@ class DeckAdapter(
                     d.dismiss()
                     when (index) {
                         0 -> fullDeck[type].remove(item).also { this@DeckAdapter.notifyDataSetChanged() }
-                        else -> {
+                        1 -> {
                             fullDeck[type].remove(item)
                             when (type) {
                                 DeckType.MAIN, DeckType.EXTRA -> fullDeck.addToDeck(item, DeckType.SIDE)
                                 DeckType.SIDE -> fullDeck.addToDeck(item)
                             }
-                            onUpdate()
+                            onUpdate(null)
                         }
+                        2 -> onUpdate(item)
                     }
                 }
                 .show()

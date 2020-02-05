@@ -15,6 +15,63 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Deck" />
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        android:weightSum="3"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/deckTitle">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/mainDeck"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="2"
+            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+            app:spanCount="4"
+            tools:listitem="@layout/card_view" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/extraDeck"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight=".5"
+            android:orientation="horizontal"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:itemCount="4"
+            tools:listitem="@layout/card_view" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/sideDeck"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight=".5"
+            android:orientation="horizontal"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:itemCount="4"
+            tools:listitem="@layout/card_view" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout><!--
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".DeckActivity">
+
+    <TextView
+        android:id="@+id/deckTitle"
+        style="@style/TextAppearance.MaterialComponents.Headline4"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:gravity="center"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Deck" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/mainDeck"
         android:layout_width="0dp"
@@ -53,4 +110,4 @@
         tools:itemCount="4"
         tools:listitem="@layout/card_view" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>-->

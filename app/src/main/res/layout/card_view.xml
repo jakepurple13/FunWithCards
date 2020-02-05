@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:layout_centerInParent="true"
     android:padding="5dp"
-    tools:showIn="@layout/activity_main">
+    tools:showIn="@layout/activity_deck">
 
     <ImageView
         android:id="@+id/yugiohCard"
