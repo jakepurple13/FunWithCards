@@ -55,7 +55,7 @@ class DeckChooseActivity : AppCompatActivity() {
     }
 }
 
-class YugiohDeckState(var topCard: YugiohCard? = null, val deckName: String, val deck: YugiohDeck = YugiohDeck())
+data class YugiohDeckState(var topCard: YugiohCard? = null, val deckName: String, val deck: YugiohDeck = YugiohDeck())
 
 class ChooseCardAdapter(private val context: Context, list: List<YugiohDeckState>) :
     DragSwipeAdapterTwo<YugiohDeckState, ChooseCardAdapter.ViewHolder>(list.toMutableList()) {

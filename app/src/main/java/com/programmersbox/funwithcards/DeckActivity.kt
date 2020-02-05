@@ -12,7 +12,6 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
-import com.bumptech.glide.request.target.Target
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.programmersbox.funwithcards.cards.DeckType
 import com.programmersbox.funwithcards.cards.YugiohCard
@@ -41,7 +40,7 @@ class DeckActivity : AppCompatActivity() {
             decks.removeIf { it.deckName == deck!!.deckName }
             decks.add(deck!!)
             saveDecks(decks)
-            Loged.f(getDecks()) { it.deckName }
+            Loged.f(getDecks().map { it.deckName })
         }
         mainDeck.adapter = deck?.deck?.get(DeckType.MAIN)?.deck?.let { DeckAdapter(this, it, deck.deck, DeckType.MAIN, onUpdate) }
         extraDeck.adapter = deck?.deck?.get(DeckType.EXTRA)?.deck?.let { DeckAdapter(this, it, deck.deck, DeckType.EXTRA, onUpdate) }
@@ -61,15 +60,15 @@ class DeckAdapter(
     private val glide = Glide.with(context)
     @SuppressLint("InflateParams")
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder =
-        ViewHolder(LayoutInflater.from(context).inflate(R.layout.card_view, null, false))
+        ViewHolder(
+            LayoutInflater.from(context).inflate(
+                if (type == DeckType.MAIN) R.layout.card_view else R.layout.card_image_view, null, false
+            )
+        )
 
     override fun ViewHolder.onBind(item: YugiohCard) {
-        glide
-            .load(item.card_images.random().image_url_small)
-            .error(R.drawable.ic_launcher_foreground)
-            .override(Target.SIZE_ORIGINAL)
-            .into(image)
-        title.text = item.name
+        glide.load(item.card_images.random().image_url_small).into(image)
+        title?.text = item.name
         itemView.setOnClickListener {
             context.startActivity(Intent(context, CardInfoActivity::class.java).apply { putExtra("card_info", item.toJson()) })
         }
@@ -103,6 +102,6 @@ class DeckAdapter(
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val image: ImageView = itemView.yugiohCard
-        val title: TextView = itemView.cardTitle
+        val title: TextView? = itemView.cardTitle
     }
 }

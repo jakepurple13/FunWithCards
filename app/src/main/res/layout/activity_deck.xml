@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    tools:ignore="HardcodedText"
     tools:context=".DeckActivity">
 
     <TextView
@@ -15,46 +16,188 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Deck" />
 
-    <LinearLayout
+    <TextView
+        android:text="Main"
+        android:textSize="28sp"
+        android:translationZ="10dp"
+        android:padding="5dp"
+        app:layout_constraintStart_toStartOf="@id/mainDeck"
+        app:layout_constraintTop_toTopOf="@id/mainDeck"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/mainDeck"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:orientation="vertical"
-        android:weightSum="3"
+        app:layout_constraintHeight_percent=".5"
+        app:layout_constraintTop_toBottomOf="@id/deckTitle"
+        app:layout_constraintBottom_toTopOf="@id/extraDeck"
+        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        app:spanCount="4"
+        tools:listitem="@layout/card_view" />
+
+    <TextView
+        android:text="Extra"
+        android:textSize="28sp"
+        android:translationZ="10dp"
+        android:padding="5dp"
+        app:layout_constraintStart_toStartOf="@id/extraDeck"
+        app:layout_constraintTop_toTopOf="@id/extraDeck"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/extraDeck"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@id/mainDeck"
+        app:layout_constraintBottom_toTopOf="@id/sideDeck"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:itemCount="4"
+        tools:listitem="@layout/card_image_view" />
+
+    <TextView
+        android:text="Side"
+        android:textSize="28sp"
+        android:translationZ="10dp"
+        android:padding="5dp"
+        app:layout_constraintStart_toStartOf="@id/sideDeck"
+        app:layout_constraintTop_toTopOf="@id/sideDeck"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/sideDeck"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/deckTitle">
+        app:layout_constraintTop_toBottomOf="@id/extraDeck"
+        android:orientation="horizontal"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:itemCount="10"
+        tools:listitem="@layout/card_image_view" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/mainDeck"
+</androidx.constraintlayout.widget.ConstraintLayout><!--<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".DeckActivity">
+
+    <TextView
+        android:id="@+id/deckTitle"
+        style="@style/TextAppearance.MaterialComponents.Headline4"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:gravity="center"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:text="Deck" />
+
+    <ScrollView
+        app:layout_constraintTop_toBottomOf="@id/deckTitle"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="0dp">
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="2"
-            app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-            app:spanCount="4"
-            tools:listitem="@layout/card_view" />
+            android:orientation="vertical"
+            android:weightSum="3">
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/extraDeck"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight=".5"
-            android:orientation="horizontal"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            tools:itemCount="4"
-            tools:listitem="@layout/card_view" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/mainDeck"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="3"
+                app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+                app:spanCount="4"
+                tools:listitem="@layout/card_view" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/sideDeck"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight=".5"
-            android:orientation="horizontal"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            tools:itemCount="4"
-            tools:listitem="@layout/card_view" />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/extraDeck"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:itemCount="4"
+                tools:listitem="@layout/card_view" />
 
-    </LinearLayout>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/sideDeck"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:itemCount="4"
+                tools:listitem="@layout/card_view" />
 
-</androidx.constraintlayout.widget.ConstraintLayout><!--
+        </LinearLayout>
+    </ScrollView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>-->
+    <!--<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+tools:context=".DeckActivity">
+
+<TextView
+    android:id="@+id/deckTitle"
+    style="@style/TextAppearance.MaterialComponents.Headline4"
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:gravity="center"
+    app:layout_constraintTop_toTopOf="parent"
+    tools:text="Deck" />
+
+<LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:orientation="vertical"
+    android:weightSum="3"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/deckTitle">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/mainDeck"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2"
+        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        app:spanCount="4"
+        tools:listitem="@layout/card_view" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/extraDeck"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight=".5"
+        android:orientation="horizontal"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:itemCount="4"
+        tools:listitem="@layout/card_view" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/sideDeck"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight=".5"
+        android:orientation="horizontal"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:itemCount="4"
+        tools:listitem="@layout/card_view" />
+
+</LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>-->
+
+    <!--
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
