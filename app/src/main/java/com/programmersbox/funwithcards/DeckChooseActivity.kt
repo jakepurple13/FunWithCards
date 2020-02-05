@@ -75,6 +75,29 @@ class ChooseCardAdapter(private val context: Context, list: List<YugiohDeckState
         itemView.setOnClickListener {
             context.startActivity(Intent(context, DeckActivity::class.java).apply { putExtra("deck_info", item.deckName) })
         }
+        itemView.setOnLongClickListener {
+            MaterialAlertDialogBuilder(context)
+                .setItems(
+                    arrayOf(
+                        "Edit Deck",
+                        "Delete Deck"
+                    )
+                ) { d, index ->
+                    d.dismiss()
+                    when (index) {
+                        0 -> itemView.performClick()
+                        else -> {
+                            val decks = context.getDecks()
+                            decks.removeIf { it.deckName == item.deckName }
+                            list.removeIf { it.deckName == item.deckName }
+                            context.saveDecks(decks)
+                            this@ChooseCardAdapter.notifyDataSetChanged()
+                        }
+                    }
+                }
+                .show()
+            true
+        }
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
