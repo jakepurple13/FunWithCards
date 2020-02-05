@@ -181,7 +181,7 @@ class ExampleUnitTest {
     fun jsonTesting() {
         val cards = getCards()
         val cardSets = cards
-            .map { it.card_sets.distinctBy { innerSet -> innerSet.set_name } }
+            .mapNotNull { it.card_sets?.distinctBy { innerSet -> innerSet.set_name } }
             .flatten()
             .distinctBy { it.set_name }
         //println(cardSets.joinToString("\n\n"))
@@ -189,6 +189,12 @@ class ExampleUnitTest {
         //println(list.entries.joinToString("\n") { "${it.key} - ${it.value.size}" })
         val work = cardSets.filter { it.set_name in list.keys }
         println("${work.size} == ${list.keys.size} == ${cardSets.size}")
+        newLine()
+        newLine()
+        //val list2 = cards.toCardSets2()
+        //println("${list2.keys.size} == ${list.size} == ${cardSets.size}")
+        //println("${list2.keys.size} == ${cardSets.size}")
+
     }
 
 }

@@ -16,11 +16,12 @@ data class YugiohCard(
     val archetype: ArcheType?,
     val desc: String,
     val linkmarkers: List<LinkDirections>?,
-    val card_sets: List<CardSet> = emptyList(),
+    val card_sets: List<CardSet>?,
     val card_images: List<CardImages> = emptyList(),
     val card_prices: List<CardPrices> = emptyList()
 ) {
     override fun equals(other: Any?): Boolean = if (other is YugiohCard) other.id == id else super.equals(other)
+    override fun hashCode(): Int = id.hashCode()
     fun highestPrice() = card_prices.sumByDouble(CardPrices::highestPrices)
     fun findSameArchetype(cardList: Iterable<YugiohCard>) = cardList.filter { it.archetype == archetype }
     fun findSameType(cardList: Iterable<YugiohCard>) = cardList.filter { it.type == type }
@@ -146,7 +147,7 @@ data class CardSet(
     val set_price: String
 ) {
     fun findAllCardsInSet(cardList: Iterable<YugiohCard>) =
-        this to cardList.filter { it.card_sets.map { s -> s.set_name }.contains(set_name) }
+        this to cardList.filter { it.card_sets?.map { s -> s.set_name }?.contains(set_name) == true }
 }
 
 data class CardPrices(
@@ -187,9 +188,9 @@ enum class SortItems(val sort: Comparator<YugiohCard>) {
 fun Iterable<YugiohCard>.toCardSets(): Map<String, List<YugiohCard>> {
     val list = mutableMapOf<String, MutableList<YugiohCard>>().withDefault { mutableListOf() }
     forEach {
-        it.card_sets.forEach { set ->
+        it.card_sets?.forEach { set ->
             list[set.set_name] = list.getOrDefault(set.set_name, mutableListOf())
-                .apply { addAll(this@toCardSets.filter { card -> card.card_sets.contains(set) }) }
+                .apply { addAll(this@toCardSets.filter { card -> card.card_sets?.contains(set) == true }) }
         }
     }
     return list
