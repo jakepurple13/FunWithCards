@@ -18,6 +18,7 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.Target
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.programmerbox.dragswipe.DragSwipeAdapter
+import com.programmersbox.funwithcards.cards.DeckType
 import com.programmersbox.funwithcards.cards.SortItems
 import com.programmersbox.funwithcards.cards.YugiohCard
 import kotlinx.android.synthetic.main.activity_main.*
@@ -72,6 +73,10 @@ class MainActivity : AppCompatActivity() {
                 .setTitle("Sort by")
                 .show()
         }
+
+        myDecks.setOnClickListener {
+            startActivity(Intent(this@MainActivity, DeckChooseActivity::class.java))
+        }
     }
 }
 
@@ -98,6 +103,24 @@ class CardAdapter(private val context: Context, list: MutableList<YugiohCard>) :
         title.text = item.name
         itemView.setOnClickListener {
             context.startActivity(Intent(context, CardInfoActivity::class.java).apply { putExtra("card_info", item.toJson()) })
+        }
+        itemView.setOnLongClickListener {
+            val decks = context.getDecks()
+            MaterialAlertDialogBuilder(context)
+                .setTitle("Add to Deck")
+                .setItems(decks.map { it.deckName }.toTypedArray()) { dialog, index ->
+                    dialog.dismiss()
+                    MaterialAlertDialogBuilder(context)
+                        .setTitle("Which Deck?")
+                        .setItems(arrayOf("Main/Extra", "Side")) { d1, index2 ->
+                            d1.dismiss()
+                            decks[index].deck.addToDeck(item, if (index2 == 0) DeckType.MAIN else DeckType.SIDE)
+                            context.saveDecks(decks)
+                        }
+                        .show()
+                }
+                .show()
+            true
         }
     }
 

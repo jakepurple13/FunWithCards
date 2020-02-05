@@ -2,6 +2,7 @@ package com.programmersbox.funwithcards
 
 
 import android.content.Context
+import android.content.SharedPreferences
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.InstanceCreator
@@ -10,6 +11,7 @@ import com.google.gson.reflect.TypeToken
 import com.programmersbox.funwithcards.cards.*
 import okhttp3.OkHttpClient
 
+val Context.defaultPrefs: SharedPreferences get() = getSharedPreferences("Prefs", Context.MODE_PRIVATE)
 
 /**
  * converts [this] to a Json string
