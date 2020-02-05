@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_centerInParent="true"
+    android:padding="5dp"
+    tools:showIn="@layout/activity_main">
+
+    <ImageView
+        android:id="@+id/yugiohCard"
+        android:layout_width="168dp"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        tools:ignore="ContentDescription"
+        tools:src="@drawable/sampleimagetwo" />
+
+    <TextView
+        android:id="@+id/cardTitle"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/yugiohCard"
+        android:layout_alignStart="@id/yugiohCard"
+        android:layout_alignEnd="@id/yugiohCard"
+        tools:text="The Creator God of Light, Horakhty" />
+
+</RelativeLayout>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".CardInfoActivity">
+
+    <ImageView
+        android:id="@+id/cardImage"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentTop="true"
+        android:layout_above="@id/image_count"
+        android:layout_centerVertical="true"
+        android:adjustViewBounds="true"
+        tools:src="@drawable/sampleimage" />
+
+    <TextView
+        android:layout_above="@id/relatedCards"
+        android:id="@+id/image_count"
+        tools:text="1/10"
+        android:padding="5dp"
+        android:gravity="end"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <com.google.android.material.button.MaterialButton
+        android:text="Related Cards"
+        android:textColor="#000"
+        android:layout_alignParentBottom="true"
+        android:id="@+id/relatedCards"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <!-- <androidx.constraintlayout.widget.ConstraintLayout
+         android:id="@+id/titleDesc"
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+         app:layout_constraintEnd_toEndOf="parent"
+         app:layout_constraintStart_toStartOf="parent"
+         app:layout_constraintTop_toTopOf="parent">
+
+         <ImageView
+             android:id="@+id/cardImage"
+             android:layout_width="0dp"
+             android:layout_height="wrap_content"
+             android:adjustViewBounds="true"
+             app:layout_constraintStart_toStartOf="parent"
+             app:layout_constraintTop_toTopOf="parent"
+             tools:src="@drawable/sampleimagetwo" />
+
+         <TextView
+             tools:text="A Cell Breeding Device"
+             android:id="@+id/cardTitle"
+             app:layout_constraintTop_toTopOf="parent"
+             app:layout_constraintStart_toEndOf="@id/cardImage"
+             app:layout_constraintEnd_toEndOf="parent"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content" />
+
+     </androidx.constraintlayout.widget.ConstraintLayout>
+
+     <ScrollView
+         android:id="@+id/descScroll"
+         android:layout_width="match_parent"
+         android:layout_height="wrap_content"
+         app:layout_constraintBottom_toBottomOf="parent"
+         app:layout_constraintTop_toBottomOf="@id/titleDesc">
+
+         <TextView
+             android:id="@+id/descriptionText"
+             android:layout_width="wrap_content"
+             android:layout_height="wrap_content"
+             tools:text="During each of your Standby Phases, put 1 A-Counter on 1 face-up monster your opponent controls." />
+     </ScrollView>-->
+
+</RelativeLayout>
