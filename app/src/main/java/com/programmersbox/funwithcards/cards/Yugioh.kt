@@ -175,13 +175,14 @@ enum class SortItems(val sort: Comparator<YugiohCard>) {
     ATTRIBUTE(compareBy<YugiohCard> { it.attribute }.thenBy { it.name }),
     RACE(compareBy<YugiohCard> { it.race }.thenBy { it.name }),
     ARCHETYPE(compareBy<YugiohCard> { it.archetype }.thenBy { it.name }),
-    IMAGE_COUNT(compareByDescending<YugiohCard> { it.card_images.size }.thenBy { it.name });
+    IMAGE_COUNT(compareByDescending<YugiohCard> { it.card_images.size }.thenBy { it.name }),
+    RANDOM(compareBy { it.name });
 
     operator fun invoke() = sort
-    fun sortWith(list: Iterable<YugiohCard>) = list.sortedWith(sort)
+    fun sortWith(list: Iterable<YugiohCard>) = if(this==RANDOM) list.shuffled() else list.sortedWith(sort)
 
     companion object {
-        operator fun invoke(item: SortItems, list: Iterable<YugiohCard>) = list.sortedWith(item.sort)
+        operator fun invoke(item: SortItems, list: Iterable<YugiohCard>) = item.sortWith(list)
     }
 
 }

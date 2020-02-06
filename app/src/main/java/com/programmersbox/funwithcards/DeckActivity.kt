@@ -30,24 +30,24 @@ class DeckActivity : AppCompatActivity() {
         deckTitle.text = deck?.deckName
         val onUpdate: (YugiohCard?) -> Unit = {
             mainDeck.swapAdapterWith<DeckAdapter, DeckAdapter.ViewHolder>(true)
-            { da -> DeckAdapter(this, deck!!.deck[DeckType.MAIN].deck.sortedWith(sortItem.sort), deck.deck, DeckType.MAIN, da.onUpdate) }
+            { da -> DeckAdapter(this, sortItem.sortWith(deck!!.deck[DeckType.MAIN].deck), deck.deck, DeckType.MAIN, da.onUpdate) }
             extraDeck.swapAdapterWith<DeckAdapter, DeckAdapter.ViewHolder>(true)
-            { da -> DeckAdapter(this, deck!!.deck[DeckType.EXTRA].deck.sortedWith(sortItem.sort), deck.deck, DeckType.EXTRA, da.onUpdate) }
+            { da -> DeckAdapter(this, sortItem.sortWith(deck!!.deck[DeckType.EXTRA].deck), deck.deck, DeckType.EXTRA, da.onUpdate) }
             sideDeck.swapAdapterWith<DeckAdapter, DeckAdapter.ViewHolder>(true)
-            { da -> DeckAdapter(this, deck!!.deck[DeckType.SIDE].deck.sortedWith(sortItem.sort), deck.deck, DeckType.SIDE, da.onUpdate) }
+            { da -> DeckAdapter(this, sortItem.sortWith(deck!!.deck[DeckType.SIDE].deck), deck.deck, DeckType.SIDE, da.onUpdate) }
             it?.let { topCard -> deck?.topCard = topCard }
             val decks = getDecks()
-            decks.removeIf { it.deckName == deck!!.deckName }
+            decks.removeIf { oldDeck -> oldDeck.deckName == deck!!.deckName }
             decks.add(deck!!)
             saveDecks(decks)
-            Loged.f(getDecks().map { it.deckName })
+            Loged.f(getDecks().map { deck -> deck.deckName })
         }
         mainDeck.adapter =
-            deck?.deck?.get(DeckType.MAIN)?.deck?.let { DeckAdapter(this, it.sortedWith(sortItem.sort), deck.deck, DeckType.MAIN, onUpdate) }
+            deck?.deck?.get(DeckType.MAIN)?.deck?.let { DeckAdapter(this, sortItem.sortWith(it), deck.deck, DeckType.MAIN, onUpdate) }
         extraDeck.adapter =
-            deck?.deck?.get(DeckType.EXTRA)?.deck?.let { DeckAdapter(this, it.sortedWith(sortItem.sort), deck.deck, DeckType.EXTRA, onUpdate) }
+            deck?.deck?.get(DeckType.EXTRA)?.deck?.let { DeckAdapter(this, sortItem.sortWith(it), deck.deck, DeckType.EXTRA, onUpdate) }
         sideDeck.adapter =
-            deck?.deck?.get(DeckType.SIDE)?.deck?.let { DeckAdapter(this, it.sortedWith(sortItem.sort), deck.deck, DeckType.SIDE, onUpdate) }
+            deck?.deck?.get(DeckType.SIDE)?.deck?.let { DeckAdapter(this, sortItem.sortWith(it), deck.deck, DeckType.SIDE, onUpdate) }
 
         sortBy.setOnClickListener {
             MaterialAlertDialogBuilder(this@DeckActivity)
