@@ -8,4 +8,4 @@
     android:padding="5dp"
     tools:ignore="ContentDescription"
     tools:showIn="@layout/activity_deck"
-    tools:src="@drawable/sampleimagetwo" />
+    tools:src="@drawable/backofcard" />

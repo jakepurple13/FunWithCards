@@ -67,9 +67,9 @@ class ChooseCardAdapter(private val context: Context, list: List<YugiohDeckState
         ViewHolder(LayoutInflater.from(context).inflate(R.layout.deck_view, null, false))
 
     override fun ViewHolder.onBind(item: YugiohDeckState) {
-        glide
-            .load((item.topCard ?: item.deck[DeckType.MAIN].deck.firstOrNull())?.card_images?.random()?.image_url_small)
-            .error(R.drawable.ic_launcher_foreground)
+        glide.load((item.topCard ?: item.deck[DeckType.MAIN].deck.firstOrNull())?.card_images?.random()?.image_url_small)
+            .error(R.drawable.backofcard)
+            .placeholder(R.drawable.backofcard)
             .override(Target.SIZE_ORIGINAL)
             .into(image)
         title.text = item.deckName

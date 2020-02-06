@@ -8,19 +8,20 @@
 
     <ImageView
         android:id="@+id/cardImage"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_centerVertical="true"
         android:adjustViewBounds="true"
+        android:layout_above="@id/moreInfo"
         tools:ignore="ContentDescription"
-        tools:src="@drawable/sampleimage" />
+        tools:src="@drawable/backofcard" />
 
     <TextView
         android:id="@+id/image_count"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/cardImage"
+        android:layout_alignTop="@id/moreInfo"
         android:layout_alignParentEnd="true"
         android:gravity="end"
         android:padding="5dp"
@@ -31,7 +32,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@id/relatedCards"
-        android:layout_below="@id/cardImage"
         android:layout_toStartOf="@id/image_count"
         android:text="More Info" />
 

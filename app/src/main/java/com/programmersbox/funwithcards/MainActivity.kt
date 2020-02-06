@@ -99,7 +99,10 @@ class CardAdapter(private val context: Context, list: MutableList<YugiohCard>) :
         ViewHolder(LayoutInflater.from(context).inflate(R.layout.card_view, null, false))
 
     override fun ViewHolder.onBind(item: YugiohCard) {
-        glide.load(item.card_images.random().image_url_small).override(Target.SIZE_ORIGINAL).into(image)
+        glide.load(item.card_images.random().image_url_small)
+            .placeholder(R.drawable.backofcard)
+            .error(R.drawable.backofcard)
+            .override(Target.SIZE_ORIGINAL).into(image)
         title.text = item.name
         itemView.setOnClickListener {
             context.startActivity(Intent(context, CardInfoActivity::class.java).apply { putExtra("card_info", item.toJson()) })
@@ -116,7 +119,7 @@ class CardAdapter(private val context: Context, list: MutableList<YugiohCard>) :
                             d1.dismiss()
                             try {
                                 decks[index].deck.addToDeck(item, if (index2 == 0) DeckType.MAIN else DeckType.SIDE)
-                            } catch(e: YugiohDeckException) {
+                            } catch (e: YugiohDeckException) {
                                 Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
                             } finally {
                                 context.saveDecks(decks)

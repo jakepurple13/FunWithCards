@@ -37,12 +37,17 @@ class CardInfoActivity : AppCompatActivity() {
         setContentView(R.layout.activity_card_info)
         card = intent.getStringExtra("card_info").fromJson<YugiohCard>()
         Loged.f(card)
-        Glide.with(this).load(card?.card_images?.get(cardImages)?.image_url).into(cardImage)
+        Glide.with(this).load(card?.card_images?.get(cardImages)?.image_url)
+            .placeholder(R.drawable.backofcard)
+            .error(R.drawable.backofcard).into(cardImage)
         imageCountSet(card)
         cardImage.setOnClickListener { cardImages++ }
         relatedCards.setOnClickListener {
             startActivity(Intent(this, RelatedCardsActivity::class.java).apply { putExtra("related_card", card.toJson()) })
         }
+
+        //<!--Small 168x246-->
+        //<!--Large 421x614-->
 
         moreInfo.setOnClickListener {
 
@@ -65,7 +70,12 @@ class CardInfoActivity : AppCompatActivity() {
                 card?.archetype.setView(cardArchetype) { "Archetype: $it" }
                 card?.attribute.setView(cardAttribute) { "Attribute: $it" }
                 card?.level.setView(cardLevel) { "Level $it" }
-                Glide.with(this).load(card?.card_images?.get(cardImages)?.image_url_small).override(Target.SIZE_ORIGINAL).into(yugiohCard)
+                Glide.with(this)
+                    .load(card?.card_images?.get(cardImages)?.image_url_small)
+                    .placeholder(R.drawable.backofcard)
+                    .error(R.drawable.backofcard)
+                    .override(Target.SIZE_ORIGINAL)
+                    .into(yugiohCard)
             }
 
             MaterialAlertDialogBuilder(this)

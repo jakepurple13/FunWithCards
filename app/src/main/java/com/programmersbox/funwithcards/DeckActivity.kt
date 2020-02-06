@@ -81,7 +81,7 @@ class DeckAdapter(
         )
 
     override fun ViewHolder.onBind(item: YugiohCard) {
-        glide.load(item.card_images.random().image_url_small).into(image)
+        glide.load(item.card_images.random().image_url_small).placeholder(R.drawable.backofcard).error(R.drawable.backofcard).into(image)
         title?.text = item.name
         itemView.setOnClickListener {
             context.startActivity(Intent(context, CardInfoActivity::class.java).apply { putExtra("card_info", item.toJson()) })
