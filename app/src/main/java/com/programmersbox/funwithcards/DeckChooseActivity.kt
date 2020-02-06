@@ -65,7 +65,11 @@ class DeckChooseActivity : AppCompatActivity() {
                 .setNegativeButton("Stop") { _, _ -> }
                 .show()
         }
+    }
 
+    override fun onActivityReenter(resultCode: Int, data: Intent?) {
+        super.onActivityReenter(resultCode, data)
+        pickADeck.adapter?.notifyDataSetChanged()
     }
 }
 

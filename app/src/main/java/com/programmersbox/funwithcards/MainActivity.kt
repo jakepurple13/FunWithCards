@@ -91,7 +91,7 @@ class MainActivity : AppCompatActivity() {
 
         sort_button.setOnClickListener {
             MaterialAlertDialogBuilder(this@MainActivity)
-                .setSingleChoiceItems(SortItems.values().map { it.name }.toTypedArray(), sortCheck) { dialog: DialogInterface, index: Int ->
+                .setSingleChoiceItems(SortItems.values().map(SortItems::name).toTypedArray(), sortCheck) { dialog: DialogInterface, index: Int ->
                     sortCheck = index
                     comparator = SortItems.values()[index].sort
                     cardView.swapAdapterWith<CardAdapter, CardAdapter.ViewHolder>(true) {

@@ -40,16 +40,17 @@ class YugiohDeck {
         if (fullCheck(card))
             throw YugiohDeckException(
                 "Cannot have more than 3 \"${card.name}\" cards." +
-                        " Main Deck: ${mainDeck.deck.count { it.id == card.id }}," +
-                        " Side Deck: ${sideDeck.deck.count { it.id == card.id }}," +
-                        " Extra Deck: ${extraDeck.deck.count { it.id == card.id }}"
+                        " Main Deck: ${mainDeck.deck.deckCount(card)}," +
+                        " Side Deck: ${sideDeck.deck.deckCount(card)}," +
+                        " Extra Deck: ${extraDeck.deck.deckCount(card)}"
             )
         else deck.addCard(card)
 
+    private fun List<YugiohCard>.deckCount(card: YugiohCard) = count { it.id == card.id || it.name == card.name }
     private fun mainDeckCheck() = mainDeck.deck.count { it.type in TypeType.deckTypes }.let { it <= 60 }
     private fun extraDeckCheck() = extraDeck.deck.count { it.type in TypeType.extraDeckTypes } <= 15
     private fun sideDeckCheck() = sideDeck.deck.size <= 15
-    private fun fullCheck(card: YugiohCard) = (sideDeck.deck + mainDeck.deck).count { it.id == card.id } >= 3
+    private fun fullCheck(card: YugiohCard) = (sideDeck.deck + mainDeck.deck).deckCount(card) >= 3
 }
 
 @Throws(YugiohDeckException::class)
