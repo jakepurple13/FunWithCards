@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -21,6 +22,7 @@ import com.programmerbox.dragswipe.DragSwipeAdapter
 import com.programmersbox.funwithcards.cards.DeckType
 import com.programmersbox.funwithcards.cards.SortItems
 import com.programmersbox.funwithcards.cards.YugiohCard
+import com.programmersbox.funwithcards.cards.YugiohDeckException
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.card_view.view.*
 
@@ -74,9 +76,7 @@ class MainActivity : AppCompatActivity() {
                 .show()
         }
 
-        myDecks.setOnClickListener {
-            startActivity(Intent(this@MainActivity, DeckChooseActivity::class.java))
-        }
+        myDecks.setOnClickListener { startActivity(Intent(this@MainActivity, DeckChooseActivity::class.java)) }
     }
 }
 
@@ -114,8 +114,13 @@ class CardAdapter(private val context: Context, list: MutableList<YugiohCard>) :
                         .setTitle("Which Deck?")
                         .setItems(arrayOf("Main/Extra", "Side")) { d1, index2 ->
                             d1.dismiss()
-                            decks[index].deck.addToDeck(item, if (index2 == 0) DeckType.MAIN else DeckType.SIDE)
-                            context.saveDecks(decks)
+                            try {
+                                decks[index].deck.addToDeck(item, if (index2 == 0) DeckType.MAIN else DeckType.SIDE)
+                            } catch(e: YugiohDeckException) {
+                                Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
+                            } finally {
+                                context.saveDecks(decks)
+                            }
                         }
                         .show()
                 }

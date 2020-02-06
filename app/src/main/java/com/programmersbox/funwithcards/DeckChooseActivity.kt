@@ -7,10 +7,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
-import android.widget.ImageView
-import android.widget.LinearLayout
-import android.widget.TextView
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -35,18 +32,19 @@ class DeckChooseActivity : AppCompatActivity() {
 
         newDeck.setOnClickListener {
             val input = EditText(this@DeckChooseActivity)
-            val lp = LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.MATCH_PARENT
-            )
+            val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT)
             input.layoutParams = lp
             MaterialAlertDialogBuilder(this@DeckChooseActivity)
                 .setTitle("Enter a Deck Name")
                 .setView(input)
                 .setPositiveButton("Create") { _, _ ->
-                    deckList.add(YugiohDeckState(deckName = input.text.toString()))
-                    saveDecks(deckList)
-                    pickADeck.adapter = ChooseCardAdapter(this, deckList)
+                    if (deckList.any { it.deckName == input.text.toString() }) {
+                        Toast.makeText(this, "You already have a deck named ${input.text}", Toast.LENGTH_LONG).show()
+                    } else {
+                        deckList.add(YugiohDeckState(deckName = input.text.toString()))
+                        saveDecks(deckList)
+                        pickADeck.adapter = ChooseCardAdapter(this, deckList)
+                    }
                 }
                 .setNegativeButton("Stop") { _, _ -> }
                 .show()
@@ -54,6 +52,9 @@ class DeckChooseActivity : AppCompatActivity() {
 
     }
 }
+
+@Suppress("FunctionName")
+fun Intent(context: Context, cls: Class<*>, block: Intent.() -> Unit) = Intent(context, cls).apply(block)
 
 data class YugiohDeckState(var topCard: YugiohCard? = null, val deckName: String, val deck: YugiohDeck = YugiohDeck())
 
@@ -72,9 +73,7 @@ class ChooseCardAdapter(private val context: Context, list: List<YugiohDeckState
             .override(Target.SIZE_ORIGINAL)
             .into(image)
         title.text = item.deckName
-        itemView.setOnClickListener {
-            context.startActivity(Intent(context, DeckActivity::class.java).apply { putExtra("deck_info", item.deckName) })
-        }
+        itemView.setOnClickListener { context.startActivity(Intent(context, DeckActivity::class.java) { putExtra("deck_info", item.deckName) }) }
         itemView.setOnLongClickListener {
             MaterialAlertDialogBuilder(context)
                 .setItems(

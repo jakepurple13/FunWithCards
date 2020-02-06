@@ -3,6 +3,10 @@ package com.programmersbox.funwithcards
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.view.ViewGroup
+import androidx.transition.AutoTransition
+import androidx.transition.Transition
+import androidx.transition.TransitionManager
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.InstanceCreator
@@ -42,6 +46,9 @@ inline fun <reified T> String?.fromJson(): T? = try {
     e.printStackTrace()
     null
 }
+
+fun <T : ViewGroup> T.animateChildren(transition: Transition? = AutoTransition(), block: T.() -> Unit) =
+    TransitionManager.beginDelayedTransition(this, transition).apply { block() }
 
 fun Context.getCards() = resources.openRawResource(R.raw.cards)
     .bufferedReader()

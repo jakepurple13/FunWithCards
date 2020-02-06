@@ -174,7 +174,8 @@ enum class SortItems(val sort: Comparator<YugiohCard>) {
     COST(compareByDescending<YugiohCard> { it.highestPrice() }.thenBy { it.name }),
     ATTRIBUTE(compareBy<YugiohCard> { it.attribute }.thenBy { it.name }),
     RACE(compareBy<YugiohCard> { it.race }.thenBy { it.name }),
-    ARCHETYPE(compareBy<YugiohCard> { it.archetype }.thenBy { it.name });
+    ARCHETYPE(compareBy<YugiohCard> { it.archetype }.thenBy { it.name }),
+    IMAGE_COUNT(compareByDescending<YugiohCard> { it.card_images.size }.thenBy { it.name });
 
     operator fun invoke() = sort
     fun sortWith(list: Iterable<YugiohCard>) = list.sortedWith(sort)

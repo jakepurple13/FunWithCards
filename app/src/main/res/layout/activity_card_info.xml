@@ -3,35 +3,46 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".CardInfoActivity">
+    tools:context=".CardInfoActivity"
+    tools:ignore="HardcodedText">
 
     <ImageView
         android:id="@+id/cardImage"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
-        android:layout_above="@id/image_count"
         android:layout_centerVertical="true"
         android:adjustViewBounds="true"
+        tools:ignore="ContentDescription"
         tools:src="@drawable/sampleimage" />
 
     <TextView
-        android:layout_above="@id/relatedCards"
         android:id="@+id/image_count"
-        tools:text="1/10"
-        android:padding="5dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/cardImage"
+        android:layout_alignParentEnd="true"
         android:gravity="end"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:padding="5dp"
+        tools:text="1/10" />
 
     <com.google.android.material.button.MaterialButton
-        android:text="Related Cards"
-        android:textColor="#000"
-        android:backgroundTint="@color/colorAccent"
-        android:layout_alignParentBottom="true"
+        android:id="@+id/moreInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/relatedCards"
+        android:layout_below="@id/cardImage"
+        android:layout_toStartOf="@id/image_count"
+        android:text="More Info" />
+
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/relatedCards"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:backgroundTint="@color/colorAccent"
+        android:text="Related Cards"
+        android:textColor="#000" />
 
     <!-- <androidx.constraintlayout.widget.ConstraintLayout
          android:id="@+id/titleDesc"

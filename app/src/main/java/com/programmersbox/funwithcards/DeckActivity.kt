@@ -2,6 +2,7 @@ package com.programmersbox.funwithcards
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -9,32 +10,31 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.programmersbox.funwithcards.cards.DeckType
-import com.programmersbox.funwithcards.cards.YugiohCard
-import com.programmersbox.funwithcards.cards.YugiohDeck
+import com.programmersbox.funwithcards.cards.*
 import kotlinx.android.synthetic.main.activity_deck.*
 import kotlinx.android.synthetic.main.card_view.view.*
 
 class DeckActivity : AppCompatActivity() {
+
+    private var sortItem = SortItems.NAME
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_deck)
         val deck = getDecks().find { it.deckName == intent.getStringExtra("deck_info") }
         deckTitle.text = deck?.deckName
         val onUpdate: (YugiohCard?) -> Unit = {
-            mainDeck.swapAdapterWith<DeckAdapter, DeckAdapter.ViewHolder>(true) { da ->
-                DeckAdapter(this, deck!!.deck[DeckType.MAIN].deck, deck.deck, DeckType.MAIN, da.onUpdate)
-            }
-            extraDeck.swapAdapterWith<DeckAdapter, DeckAdapter.ViewHolder>(true) { da ->
-                DeckAdapter(this, deck!!.deck[DeckType.EXTRA].deck, deck.deck, DeckType.EXTRA, da.onUpdate)
-            }
-            sideDeck.swapAdapterWith<DeckAdapter, DeckAdapter.ViewHolder>(true) { da ->
-                DeckAdapter(this, deck!!.deck[DeckType.SIDE].deck, deck.deck, DeckType.SIDE, da.onUpdate)
-            }
+            mainDeck.swapAdapterWith<DeckAdapter, DeckAdapter.ViewHolder>(true)
+            { da -> DeckAdapter(this, deck!!.deck[DeckType.MAIN].deck.sortedWith(sortItem.sort), deck.deck, DeckType.MAIN, da.onUpdate) }
+            extraDeck.swapAdapterWith<DeckAdapter, DeckAdapter.ViewHolder>(true)
+            { da -> DeckAdapter(this, deck!!.deck[DeckType.EXTRA].deck.sortedWith(sortItem.sort), deck.deck, DeckType.EXTRA, da.onUpdate) }
+            sideDeck.swapAdapterWith<DeckAdapter, DeckAdapter.ViewHolder>(true)
+            { da -> DeckAdapter(this, deck!!.deck[DeckType.SIDE].deck.sortedWith(sortItem.sort), deck.deck, DeckType.SIDE, da.onUpdate) }
             it?.let { topCard -> deck?.topCard = topCard }
             val decks = getDecks()
             decks.removeIf { it.deckName == deck!!.deckName }
@@ -42,9 +42,23 @@ class DeckActivity : AppCompatActivity() {
             saveDecks(decks)
             Loged.f(getDecks().map { it.deckName })
         }
-        mainDeck.adapter = deck?.deck?.get(DeckType.MAIN)?.deck?.let { DeckAdapter(this, it, deck.deck, DeckType.MAIN, onUpdate) }
-        extraDeck.adapter = deck?.deck?.get(DeckType.EXTRA)?.deck?.let { DeckAdapter(this, it, deck.deck, DeckType.EXTRA, onUpdate) }
-        sideDeck.adapter = deck?.deck?.get(DeckType.SIDE)?.deck?.let { DeckAdapter(this, it, deck.deck, DeckType.SIDE, onUpdate) }
+        mainDeck.adapter =
+            deck?.deck?.get(DeckType.MAIN)?.deck?.let { DeckAdapter(this, it.sortedWith(sortItem.sort), deck.deck, DeckType.MAIN, onUpdate) }
+        extraDeck.adapter =
+            deck?.deck?.get(DeckType.EXTRA)?.deck?.let { DeckAdapter(this, it.sortedWith(sortItem.sort), deck.deck, DeckType.EXTRA, onUpdate) }
+        sideDeck.adapter =
+            deck?.deck?.get(DeckType.SIDE)?.deck?.let { DeckAdapter(this, it.sortedWith(sortItem.sort), deck.deck, DeckType.SIDE, onUpdate) }
+
+        sortBy.setOnClickListener {
+            MaterialAlertDialogBuilder(this@DeckActivity)
+                .setSingleChoiceItems(SortItems.values().map { it.name }.toTypedArray(), sortItem.ordinal) { dialog: DialogInterface, index: Int ->
+                    sortItem = SortItems.values()[index]
+                    onUpdate(null)
+                    dialog.dismiss()
+                }
+                .setTitle("Sort by")
+                .show()
+        }
     }
 }
 
@@ -83,14 +97,20 @@ class DeckAdapter(
                 .setItems(whereTo) { d, index ->
                     d.dismiss()
                     when (index) {
-                        0 -> fullDeck[type].remove(item).also { this@DeckAdapter.notifyDataSetChanged() }
+                        0 -> fullDeck[type].remove(item).also { onUpdate(null) }
                         1 -> {
                             fullDeck[type].remove(item)
-                            when (type) {
-                                DeckType.MAIN, DeckType.EXTRA -> fullDeck.addToDeck(item, DeckType.SIDE)
-                                DeckType.SIDE -> fullDeck.addToDeck(item)
+                            try {
+                                when (type) {
+                                    DeckType.MAIN, DeckType.EXTRA -> fullDeck.addToDeck(item, DeckType.SIDE)
+                                    DeckType.SIDE -> fullDeck.addToDeck(item)
+                                }
+                            } catch (e: YugiohDeckException) {
+                                Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
+                                fullDeck[type].addCard(item)
+                            } finally {
+                                onUpdate(null)
                             }
-                            onUpdate(null)
                         }
                         2 -> onUpdate(item)
                     }

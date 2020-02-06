@@ -51,6 +51,15 @@ class ExampleUnitTest {
     private fun <T> Collection<T>.takeRandom(n: Int): List<T> = mutableListOf<T>().apply { repeat(n) { this += this@takeRandom.random() } }
 
     @Test
+    fun other4() {
+        val cards = getCards()
+        val images = cards.sortedWith(SortItems.IMAGE_COUNT.sort)
+        println(images.groupBy { it.card_images.size }.entries.joinToString("\n") { "${it.key} -> ${it.value.size}" })
+        newLine()
+        println(images.groupBy { it.card_images.size }.entries.joinToString("\n") { "${it.key} -> ${it.value.joinToString { it.name }}" })
+    }
+
+    @Test
     fun other3() {
         val cards = getCards()
         val deck = YugiohDeck().apply {

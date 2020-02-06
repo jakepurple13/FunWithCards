@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="5dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!--168x246-->
+
+    <ImageView
+        android:id="@+id/yugiohCard"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:padding="5dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:ignore="ContentDescription"
+        tools:src="@drawable/sampleimagetwo" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@id/yugiohCard"
+        android:layout_alignParentTop="true"
+        android:layout_toEndOf="@id/yugiohCard">
+
+        <TextView
+            android:id="@+id/titleOfCard"
+            style="@style/TextAppearance.MaterialComponents.Headline6"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="A Cell Breeding Device" />
+
+        <ScrollView
+            app:layout_constraintTop_toBottomOf="@id/titleOfCard"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_width="match_parent"
+            android:layout_height="0dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:divider="@color/colorAccent"
+            android:showDividers="middle|beginning|end"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/cardRace"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="Race: Continuous" />
+
+            <TextView
+                android:id="@+id/cardLevel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="Level 5" />
+
+            <TextView
+                android:id="@+id/cardAttribute"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="Attribute: Water" />
+
+            <TextView
+                android:id="@+id/cardArchetype"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="Archetype: Alien" />
+
+            <TextView
+                android:id="@+id/cardLinkMarkers"
+                tools:text="Link Markers: Bottom, Top, Right, Left"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/cardScale"
+                tools:text="Scale: 4"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/cardATK"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="ATK/ 1500" />
+
+            <TextView
+                android:id="@+id/cardDEF"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="DEF/ 1500" />
+
+            <TextView
+                android:id="@+id/cardLinkVal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="LINK-1" />
+
+            <TextView
+                android:id="@+id/cardID"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:text="ID: 34541863" />
+        </LinearLayout>
+
+        </ScrollView>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <ScrollView
+        android:id="@+id/descView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/yugiohCard">
+
+        <TextView
+            android:id="@+id/cardDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:text="Example Text" />
+    </ScrollView>
+
+</RelativeLayout>
