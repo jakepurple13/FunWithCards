@@ -50,16 +50,18 @@ class MainActivity : AppCompatActivity() {
         Dexter.withActivity(this)
             .withPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)
             .withListener(object : MultiplePermissionsListener {
-                override fun onPermissionsChecked(report: MultiplePermissionsReport?) {
-                    FileSaver.canUseFile = report?.areAllPermissionsGranted() ?: false
+                override fun onPermissionsChecked(report: MultiplePermissionsReport) {
+                    FileSaver.canUseFile = report.areAllPermissionsGranted()
                     if (!FileSaver.canUseFile) {
                         Toast.makeText(this@MainActivity, "Can't use all functions", Toast.LENGTH_SHORT).show()
                     }
                 }
 
-                override fun onPermissionRationaleShouldBeShown(permissions: MutableList<PermissionRequest>?, token: PermissionToken?) =
-                    token?.continuePermissionRequest().let { Unit }
+                override fun onPermissionRationaleShouldBeShown(permissions: MutableList<PermissionRequest>, token: PermissionToken) =
+                    token.continuePermissionRequest()
+
             })
+            .withErrorListener { Loged.f(it) }
             .check()
 
         val cards = getCards()

@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.os.Environment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,42 +20,23 @@ import kotlinx.android.synthetic.main.activity_deck_choose.*
 import kotlinx.android.synthetic.main.card_view.view.*
 import java.io.File
 
-//fun Context.getDecks() = (defaultPrefs.getString("decks", null).fromJson<List<YugiohDeckState>>() ?: emptyList()).toMutableList()
-//fun Context.saveDecks(decks: List<YugiohDeckState>) = defaultPrefs.edit().putString("decks", decks.toJson()).apply()
-
-/*fun Context.getDecks(): MutableList<YugiohDeckState> = (if (FileSaver.canUseFile) {
-    File("${Environment.DIRECTORY_DOCUMENTS}/YugiohDeckMaker/decks.json").let { if (it.exists()) it.readText() else "" }
-} else {
-    defaultPrefs.getString("decks", null)
-}.fromJson<List<YugiohDeckState>>() ?: emptyList()).toMutableList()*/
-
-val folderLocation = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES).toString() + "/YugiohDeckMaker/"
+fun Context.getYugiFolder(fileName: String) = File(getExternalFilesDir("YugiohDeckMaker"), fileName)
 
 fun Context.getDecks(): MutableList<YugiohDeckState> {
-    val deckFile = (if (FileSaver.canUseFile)
-        File("${folderLocation}decks.json").let { if (it.exists()) it.readText() else "" }
-            .fromJson<List<YugiohDeckState>>() ?: emptyList()
-    else emptyList()).toMutableList()
-    val sharedFile = (defaultPrefs.getString("decks", null).fromJson<List<YugiohDeckState>>() ?: emptyList()).toMutableList()
-    return (deckFile + sharedFile).distinctBy { it.deckName }.toMutableList()
+    val deckFile =
+        if (FileSaver.canUseFile) getYugiFolder("decks.json").let { if (it.exists()) it.readText() else "" }.fromJson<List<YugiohDeckState>>() else emptyList()
+    val sharedFile = defaultPrefs.getString("decks", null).fromJson<List<YugiohDeckState>>()
+    return listOfNotNull(deckFile, sharedFile).flatten().distinctBy { it.deckName }.toMutableList()
 }
 
 fun Context.saveDecks(decks: List<YugiohDeckState>) {
     if (FileSaver.canUseFile) {
-        try {
-            val deckFile = File("${folderLocation}decks.json")
-            if (!deckFile.exists()) {
-                deckFile.mkdirs()
-                deckFile.createNewFile()
-            }
-            deckFile.writeText(decks.toJson())
-        } catch(e: Exception) {
-
-        }
+        val deckFile = getYugiFolder("decks.json")
+        if (!deckFile.exists()) deckFile.createNewFile()
+        deckFile.writeText(decks.toJson())
     }
     defaultPrefs.edit().putString("decks", decks.toJson()).apply()
 }
-
 
 class DeckChooseActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
