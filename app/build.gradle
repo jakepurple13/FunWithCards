@@ -49,4 +49,5 @@ dependencies {
     implementation 'com.github.jakepurple13.DragSwipeApp:dragswipeex:v2.2'
     implementation 'io.pokemontcg:pokemon-tcg-sdk-kotlin:+'
     implementation 'com.karumi:dexter:6.0.2'
+    implementation 'com.github.myinnos:AlphabetIndex-Fast-Scroll-RecyclerView:1.0.95'
 }

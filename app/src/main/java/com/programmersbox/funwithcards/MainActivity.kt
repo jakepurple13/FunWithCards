@@ -12,6 +12,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.SectionIndexer
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -64,8 +65,26 @@ class MainActivity : AppCompatActivity() {
             .withErrorListener { Loged.f(it) }
             .check()
 
+        @Suppress("IMPLICIT_CAST_TO_ANY")
+        fun action(index: Int): YugiohCard.() -> String = {
+            when (SortItems.values()[index]) {
+                SortItems.NAME -> name
+                SortItems.ID -> id
+                SortItems.FRAME -> type
+                SortItems.ATK -> atk
+                SortItems.DEF -> def
+                SortItems.LEVEL -> level
+                SortItems.COST -> highestPrice()
+                SortItems.ATTRIBUTE -> attribute
+                SortItems.RACE -> race
+                SortItems.ARCHETYPE -> archetype
+                SortItems.IMAGE_COUNT -> card_images.size
+                SortItems.RANDOM -> null
+            }.toString()
+        }
+
         val cards = getCards()
-        cardView.adapter = CardAdapter(this, cards.toMutableList())
+        cardView.adapter = CardAdapter(this, cards.toMutableList(), action(0))
 
         var comparator = compareBy<YugiohCard> { it.name }
             .thenBy { it.desc }
@@ -78,24 +97,25 @@ class MainActivity : AppCompatActivity() {
             it.name.contains(searchText, true) || it.desc.contains(searchText, true)
         }
 
+        var sortCheck = 0
+
         search_info.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) = Unit
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) = Unit
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) =
-                cardView.swapAdapterWith<CardAdapter, CardAdapter.ViewHolder>(true) {
-                    CardAdapter(this@MainActivity, cards.filter(filter).sortedWith(comparator).toMutableList())
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                cardView.adapter = (cardView.adapter as? CardAdapter)?.let {
+                    CardAdapter(this@MainActivity, cards.filter(filter).sortedWith(comparator).toMutableList(), action(sortCheck))
                 }
+            }
         })
-
-        var sortCheck = 0
 
         sort_button.setOnClickListener {
             MaterialAlertDialogBuilder(this@MainActivity)
                 .setSingleChoiceItems(SortItems.values().map(SortItems::name).toTypedArray(), sortCheck) { dialog: DialogInterface, index: Int ->
                     sortCheck = index
                     comparator = SortItems.values()[index].sort
-                    cardView.swapAdapterWith<CardAdapter, CardAdapter.ViewHolder>(true) {
-                        CardAdapter(this@MainActivity, SortItems.values()[index].sortWith(it.list).toMutableList())
+                    cardView.adapter = (cardView.adapter as? CardAdapter)?.let {
+                        CardAdapter(this@MainActivity, SortItems.values()[index].sortWith(it.list).toMutableList(), action(index))
                     }
                     dialog.dismiss()
                 }
@@ -118,7 +138,8 @@ abstract class DragSwipeAdapterTwo<T, VH : RecyclerView.ViewHolder>(list: Mutabl
     override fun onBindViewHolder(holder: VH, position: Int) = holder.onBind(list[position])
 }
 
-class CardAdapter(private val context: Context, list: MutableList<YugiohCard>) : DragSwipeAdapterTwo<YugiohCard, CardAdapter.ViewHolder>(list) {
+class CardAdapter(private val context: Context, list: MutableList<YugiohCard>, private var action: YugiohCard.() -> String = { name }) :
+    DragSwipeAdapterTwo<YugiohCard, CardAdapter.ViewHolder>(list), SectionIndexer {
 
     private val glide = Glide.with(context)
     @SuppressLint("InflateParams")
@@ -158,6 +179,26 @@ class CardAdapter(private val context: Context, list: MutableList<YugiohCard>) :
             true
         }
     }
+
+    private var mSectionPositions: MutableList<Int> = mutableListOf()
+    override fun getSectionForPosition(position: Int): Int = 0
+    override fun getSections(): Array<String> {
+        val sections = ArrayList<String>(26)
+        mSectionPositions = ArrayList(26)
+        var i = 0
+        val size = list.size
+        while (i < size) {
+            val section = list[i].action()[0].toUpperCase().toString()
+            if (!sections.contains(section)) {
+                sections.add(section)
+                mSectionPositions.add(i)
+            }
+            i++
+        }
+        return sections.toTypedArray()
+    }
+
+    override fun getPositionForSection(sectionIndex: Int): Int = mSectionPositions[sectionIndex]
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val image: ImageView = itemView.yugiohCard
