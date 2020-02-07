@@ -68,8 +68,7 @@ class DeckAdapter(
     private val fullDeck: YugiohDeck,
     private val type: DeckType,
     val onUpdate: (YugiohCard?) -> Unit
-) :
-    DragSwipeAdapterTwo<YugiohCard, DeckAdapter.ViewHolder>(list.toMutableList()) {
+) : DragSwipeAdapterTwo<YugiohCard, DeckAdapter.ViewHolder>(list.toMutableList()) {
 
     private val glide = Glide.with(context)
     @SuppressLint("InflateParams")

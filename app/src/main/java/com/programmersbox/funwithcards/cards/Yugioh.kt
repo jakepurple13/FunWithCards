@@ -156,8 +156,8 @@ data class CardPrices(
     val ebay_price: String,
     val amazon_price: String
 ) {
-    fun highestPrices() =
-        listOfNotNull(cardmarket_price, tcgplayer_price, ebay_price, amazon_price).maxBy { it.toDoubleOrNull() ?: 0.0 }?.toDoubleOrNull() ?: 0.0
+    fun highestPrices() = listOfNotNull(cardmarket_price, tcgplayer_price, ebay_price, amazon_price)
+        .map { it.toDoubleOrNull() ?: 0.0 }.max() ?: 0.0
 }
 
 data class CardImages(val id: Number, val image_url: String, val image_url_small: String)
@@ -178,8 +178,7 @@ enum class SortItems(val sort: Comparator<YugiohCard>) {
     IMAGE_COUNT(compareByDescending<YugiohCard> { it.card_images.size }.thenBy { it.name }),
     RANDOM(compareBy { it.name });
 
-    operator fun invoke() = sort
-    fun sortWith(list: Iterable<YugiohCard>) = if(this==RANDOM) list.shuffled() else list.sortedWith(sort)
+    fun sortWith(list: Iterable<YugiohCard>) = if (this == RANDOM) list.shuffled() else list.sortedWith(sort)
 
     companion object {
         operator fun invoke(item: SortItems, list: Iterable<YugiohCard>) = item.sortWith(list)

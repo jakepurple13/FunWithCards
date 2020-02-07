@@ -20,11 +20,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.Target
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.karumi.dexter.Dexter
-import com.karumi.dexter.MultiplePermissionsReport
-import com.karumi.dexter.PermissionToken
-import com.karumi.dexter.listener.PermissionRequest
-import com.karumi.dexter.listener.multi.MultiplePermissionsListener
+import com.gun0912.tedpermission.PermissionListener
+import com.gun0912.tedpermission.TedPermission
 import com.programmerbox.dragswipe.DragSwipeAdapter
 import com.programmersbox.funwithcards.cards.DeckType
 import com.programmersbox.funwithcards.cards.SortItems
@@ -47,23 +44,7 @@ class MainActivity : AppCompatActivity() {
         Loged.OTHER_CLASS_FILTER = { !it.contains("Framing") }
 
         printRuntimeInfo()
-
-        Dexter.withActivity(this)
-            .withPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)
-            .withListener(object : MultiplePermissionsListener {
-                override fun onPermissionsChecked(report: MultiplePermissionsReport) {
-                    FileSaver.canUseFile = report.areAllPermissionsGranted()
-                    if (!FileSaver.canUseFile) {
-                        Toast.makeText(this@MainActivity, "Can't use all functions", Toast.LENGTH_SHORT).show()
-                    }
-                }
-
-                override fun onPermissionRationaleShouldBeShown(permissions: MutableList<PermissionRequest>, token: PermissionToken) =
-                    token.continuePermissionRequest()
-
-            })
-            .withErrorListener { Loged.f(it) }
-            .check()
+        permissionCheck()
 
         @Suppress("IMPLICIT_CAST_TO_ANY")
         fun action(index: Int): YugiohCard.() -> String = {
@@ -125,6 +106,49 @@ class MainActivity : AppCompatActivity() {
 
         myDecks.setOnClickListener { startActivity(Intent(this@MainActivity, DeckChooseActivity::class.java)) }
     }
+
+}
+
+fun Context.permissionCheck(granted: () -> Unit = {}) {
+
+
+    TedPermission.with(this)
+        .setPermissionListener(object : PermissionListener {
+            override fun onPermissionGranted() {
+                Toast.makeText(this@permissionCheck, "Permission Granted", Toast.LENGTH_SHORT).show()
+                granted()
+            }
+
+            override fun onPermissionDenied(deniedPermissions: List<String>) {
+                Toast.makeText(this@permissionCheck, "Permission Denied\n$deniedPermissions", Toast.LENGTH_SHORT).show()
+            }
+        })
+        .setDeniedMessage("If you reject permission,you can not use this service\n\nPlease turn on permissions at [Setting] > [Permission]")
+        .setPermissions(Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+        .check()
+
+    /*Permissions.check(this,
+        arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE),
+        "Storage permissions are required because so we can save Decks",
+        Permissions.Options().setSettingsDialogTitle("Warning!").setRationaleDialogTitle("Info"),
+        object : PermissionHandler() {
+            override fun onGranted() {
+                //do your task
+                FileSaver.canUseFile = true
+                granted()
+            }
+
+            override fun onDenied(context: Context?, deniedPermissions: java.util.ArrayList<String>?) {
+                super.onDenied(context, deniedPermissions)
+                if (!FileSaver.canUseFile) Toast.makeText(this@permissionCheck, "Can't use all functions", Toast.LENGTH_SHORT).show()
+                Permissions.check(
+                    this@permissionCheck, deniedPermissions!!.toTypedArray(),
+                    "Storage permissions are required because so we can save Decks",
+                    Permissions.Options().setSettingsDialogTitle("Warning!").setRationaleDialogTitle("Info"),
+                    this
+                )
+            }
+        })*/
 }
 
 @Suppress("UNCHECKED_CAST")

@@ -32,6 +32,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@id/relatedCards"
+        android:backgroundTint="@color/colorAccent"
         android:layout_toStartOf="@id/image_count"
         android:text="More Info" />
 

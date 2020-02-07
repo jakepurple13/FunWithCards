@@ -42,13 +42,21 @@ class ExampleUnitTest {
     }
 
     private fun getCards() =
-        File("/Users/jrein/Documents/FunWithCards/app/src/main/res/raw/cards.json")
-            .readText()
-            .fromJson<List<YugiohCard>>()!!
+        File("/Users/jrein/Documents/FunWithCards/app/src/main/res/raw/cards.json").readText().fromJson<List<YugiohCard>>()!!
 
     private fun newLine(type: String = "") = println(type + "-----".repeat(10))
-
     private fun <T> Collection<T>.takeRandom(n: Int): List<T> = mutableListOf<T>().apply { repeat(n) { this += this@takeRandom.random() } }
+
+    @Test
+    fun other5() {
+        val cards = getCards()
+        val archeType = cards.groupBy { it.archetype }
+        println(archeType.entries.sortedByDescending { it.value.size }.joinToString("\n") { "${it.key} - ${it.value.size}" })
+        newLine()
+
+        //val type = cards.filter { it.archetype == ArcheType.Greed }
+        //println(type.joinToString("\n${"-----".repeat(10)}\n"))
+    }
 
     @Test
     fun other4() {

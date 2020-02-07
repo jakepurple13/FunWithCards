@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -38,16 +39,12 @@ class CardInfoActivity : AppCompatActivity() {
         card = intent.getStringExtra("card_info").fromJson<YugiohCard>()
         Loged.f(card)
         Glide.with(this).load(card?.card_images?.get(cardImages)?.image_url)
-            .placeholder(R.drawable.backofcard)
-            .error(R.drawable.backofcard).into(cardImage)
+            .placeholder(R.drawable.backofcard).error(R.drawable.backofcard).into(cardImage)
         imageCountSet(card)
         cardImage.setOnClickListener { cardImages++ }
         relatedCards.setOnClickListener {
             startActivity(Intent(this, RelatedCardsActivity::class.java).apply { putExtra("related_card", card.toJson()) })
         }
-
-        //<!--Small 168x246-->
-        //<!--Large 421x614-->
 
         moreInfo.setOnClickListener {
 
@@ -66,21 +63,20 @@ class CardInfoActivity : AppCompatActivity() {
                 card?.def.setView(cardDEF) { "DEF/ $it" }
                 card?.linkval.setView(cardLinkVal) { "LINK-$it" }
                 card?.scale.setView(cardScale) { "Scale: $it" }
-                card?.linkmarkers.setView(cardLinkMarkers) { "Link Markers: ${it.joinToString { it.name }}" }
+                card?.linkmarkers.setView(cardLinkMarkers) { "Link Markers: ${it.joinToString { marker -> marker.name }}" }
                 card?.archetype.setView(cardArchetype) { "Archetype: $it" }
                 card?.attribute.setView(cardAttribute) { "Attribute: $it" }
                 card?.level.setView(cardLevel) { "Level $it" }
                 Glide.with(this)
                     .load(card?.card_images?.get(cardImages)?.image_url_small)
-                    .placeholder(R.drawable.backofcard)
-                    .error(R.drawable.backofcard)
+                    .placeholder(R.drawable.backofcard).error(R.drawable.backofcard)
                     .override(Target.SIZE_ORIGINAL)
                     .into(yugiohCard)
             }
 
-            MaterialAlertDialogBuilder(this)
-                .setView(fullView)
-                .show()
+            val lp = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.MATCH_PARENT)
+            fullView.layoutParams = lp
+            MaterialAlertDialogBuilder(this).setView(fullView).show()
         }
 
         cardImage.setOnLongClickListener {
@@ -106,6 +102,5 @@ class CardInfoActivity : AppCompatActivity() {
                 .show()
             true
         }
-
     }
 }

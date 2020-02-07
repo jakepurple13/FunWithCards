@@ -21,6 +21,11 @@ android {
         }
     }
 
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
     buildTypes {
         release {
             minifyEnabled false
@@ -50,4 +55,7 @@ dependencies {
     implementation 'io.pokemontcg:pokemon-tcg-sdk-kotlin:+'
     implementation 'com.karumi:dexter:6.0.2'
     implementation 'com.github.myinnos:AlphabetIndex-Fast-Scroll-RecyclerView:1.0.95'
+    implementation 'com.github.codekidX:storage-chooser:2.0.4.4'
+    implementation 'com.nabinbhandari.android:permissions:3.8'
+    implementation 'gun0912.ted:tedpermission:+'
 }
