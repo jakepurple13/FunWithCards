@@ -20,7 +20,7 @@ data class YugiohCard(
     val card_images: List<CardImages> = emptyList(),
     val card_prices: List<CardPrices> = emptyList()
 ) {
-    override fun equals(other: Any?): Boolean = if (other is YugiohCard) other.id == id else super.equals(other)
+    override fun equals(other: Any?): Boolean = if (other is YugiohCard) (other.id == id || other.name == name) else super.equals(other)
     override fun hashCode(): Int = id.hashCode()
     fun highestPrice() = card_prices.sumByDouble(CardPrices::highestPrices)
     fun findSameArchetype(cardList: Iterable<YugiohCard>) = cardList.filter { it.archetype == archetype }
@@ -115,9 +115,11 @@ enum class TypeType {
 
     EFFECT_MONSTER, FLIP_EFFECT_MONSTER, FLIP_TUNER_MONSTER, GEMINI_MONSTER, NORMAL_MONSTER, NORMAL_TUNER_MONSTER, PENDULUM_EFFECT_MONSTER,
     PENDULUM_FLIP_EFFECT_MONSTER, PENDULUM_NORMAL_MONSTER, PENDULUM_TUNER_EFFECT_MONSTER, RITUAL_EFFECT_MONSTER, RITUAL_MONSTER,
-    SKILL_CARD, SPIRIT_MONSTER, TOON_MONSTER, TUNER_MONSTER, UNION_EFFECT_MONSTER, UNION_TUNER_EFFECT_MONSTER, //Normal Deck Monsters
+    SPIRIT_MONSTER, TOON_MONSTER, TUNER_MONSTER, UNION_EFFECT_MONSTER, UNION_TUNER_EFFECT_MONSTER, //Normal Deck Monsters
 
     TRAP_CARD, SPELL_CARD, //Trap/Spell
+
+    SKILL_CARD, //Other?
 
     FUSION_MONSTER, LINK_MONSTER, PENDULUM_EFFECT_FUSION_MONSTER, SYNCHRO_MONSTER, SYNCHRO_PENDULUM_EFFECT_MONSTER, SYNCHRO_TUNER_MONSTER, XYZ_MONSTER,
     XYZ_PENDULUM_EFFECT_MONSTER; //Extra Deck Monsters

@@ -78,6 +78,7 @@ class Deck<T>(vararg cards: T) {
     operator fun invoke(deck: Deck<T>) = deckOfCards.addCards(deck.deckOfCards)
     operator fun invoke(vararg cards: T) = deckOfCards.addCards(*cards)
     operator fun invoke(card: Iterable<T>) = deckOfCards.addCards(card)
+    operator fun invoke(listener: DeckListenerBuilder<T>.() -> Unit) = addDeckListener(listener)
     operator fun get(index: Int) = deckOfCards[index]
     fun remove(card: T) = deckOfCards.remove(card)
 

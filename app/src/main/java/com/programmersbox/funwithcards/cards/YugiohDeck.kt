@@ -14,6 +14,12 @@ class YugiohDeck {
         DeckType.SIDE -> sideDeck
     }
 
+    fun addDeckListener(deckType: DeckType, listener: Deck.DeckListenerBuilder<YugiohCard>.() -> Unit) = this[deckType].addDeckListener(listener)
+    fun shuffle() = mainDeck.shuffle()
+
+    @Throws(YugiohDeckException::class)
+    fun addToDeck(vararg cards: Pair<YugiohCard, DeckType>) = cards.forEach { addToDeck(it.first, it.second) }
+
     @Throws(YugiohDeckException::class)
     fun addToDeck(vararg card: YugiohCard, deckType: DeckType = DeckType.MAIN) = card.forEach { addToDeck(it, deckType) }
 
@@ -56,4 +62,3 @@ class YugiohDeck {
 @Throws(YugiohDeckException::class)
 fun Deck<YugiohCard>.addToDeck(card: YugiohCard): Boolean =
     if (deck.count { it == card } >= 3) throw YugiohDeckException("Cannot have more than 3 cards of ${card.name}") else addCard(card)
-

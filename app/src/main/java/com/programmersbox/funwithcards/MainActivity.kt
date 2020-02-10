@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity() {
                 SortItems.RACE -> race
                 SortItems.ARCHETYPE -> archetype
                 SortItems.IMAGE_COUNT -> card_images.size
-                SortItems.RANDOM -> null
+                SortItems.RANDOM -> ""
             }.toString()
         }
 
@@ -110,7 +110,6 @@ class MainActivity : AppCompatActivity() {
 }
 
 fun Context.permissionCheck(granted: () -> Unit = {}) {
-
 
     TedPermission.with(this)
         .setPermissionListener(object : PermissionListener {

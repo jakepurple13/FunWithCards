@@ -47,6 +47,57 @@ class ExampleUnitTest {
     private fun newLine(type: String = "") = println(type + "-----".repeat(10))
     private fun <T> Collection<T>.takeRandom(n: Int): List<T> = mutableListOf<T>().apply { repeat(n) { this += this@takeRandom.random() } }
 
+    private fun <T> Collection<T>.takeRandom(n: Int, predicate: (T) -> Boolean): List<T> =
+        filter(predicate).let { filtered -> mutableListOf<T>().apply { repeat(n) { this += filtered.random() } } }
+
+    private fun <T> Collection<T>.random(predicate: (T) -> Boolean) = filter(predicate).random()
+
+    @Test
+    fun other6() {
+        val cards = getCards()
+        val deck = YugiohDeck()
+        deck.addToDeck(*cards.takeRandom(50) { it.type in TypeType.deckTypes }.toTypedArray(), deckType = DeckType.MAIN)
+        deck.addToDeck(*cards.takeRandom(7).toTypedArray(), deckType = DeckType.SIDE)
+        deck.addToDeck(*cards.takeRandom(7) { it.type in TypeType.extraDeckTypes }.toTypedArray(), deckType = DeckType.EXTRA)
+
+        deck[DeckType.MAIN].addDeckListener {
+            onAdd { println("Adding ${it.map { it.name }} to Main") }
+            onDraw { println("I drew ${it.name}") }
+            onShuffle { Loged.f("Shuffling...") }
+        }
+
+        deck.addDeckListener(DeckType.SIDE) {
+            onAdd { println("Adding ${it.map { it.name }} to Side") }
+        }
+
+        deck[DeckType.EXTRA] {
+            onAdd { println("Adding ${it.map { it.name }} to Extra") }
+        }
+
+        deck.addToDeck(
+            cards.random() to DeckType.SIDE,
+            cards.random() to DeckType.MAIN,
+            cards.random { it.type in TypeType.extraDeckTypes } to DeckType.EXTRA
+        )
+
+        cards.random() into DeckType.MAIN s deck
+        cards.random() into deck s DeckType.MAIN
+
+        deck.shuffle()
+
+        newLine(deck[DeckType.MAIN].draw().name)
+
+        println(deck[DeckType.MAIN].deck.joinToString { it.name })
+        println(deck[DeckType.EXTRA].deck.joinToString { it.name })
+        println(deck[DeckType.SIDE].deck.joinToString { it.name })
+    }
+
+    private infix fun YugiohCard.into(deck: DeckType) = this to deck
+    private infix fun YugiohCard.into(deck: YugiohDeck) = this to deck
+
+    private infix fun Pair<YugiohCard, DeckType>.s(deck: YugiohDeck) = deck.addToDeck(first, second)
+    private infix fun Pair<YugiohCard, YugiohDeck>.s(type: DeckType) = second.addToDeck(first, type)
+
     @Test
     fun other5() {
         val cards = getCards()
