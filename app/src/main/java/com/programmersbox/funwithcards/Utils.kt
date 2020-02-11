@@ -32,14 +32,10 @@ fun Any?.toPrettyJson(): String = GsonBuilder().setPrettyPrinting().create().toJ
  */
 inline fun <reified T> String?.fromJson(): T? = try {
     GsonBuilder()
-        .registerTypeAdapter(RaceType::class.java,
-            JsonDeserializer<RaceType?> { json, _, _ -> RaceType(json.asString) })
-        .registerTypeAdapter(TypeType::class.java,
-            JsonDeserializer<TypeType?> { json, _, _ -> TypeType(json.asString) })
-        .registerTypeAdapter(ArcheType::class.java,
-            JsonDeserializer<ArcheType?> { json, _, _ -> ArcheType(json.asString) })
-        .registerTypeAdapter(Deck.DeckListener::class.java,
-            InstanceCreator<Deck.DeckListener<T>?> { null })
+        .registerTypeAdapter(RaceType::class.java, JsonDeserializer<RaceType?> { json, _, _ -> RaceType(json.asString) })
+        .registerTypeAdapter(TypeType::class.java, JsonDeserializer<TypeType?> { json, _, _ -> TypeType(json.asString) })
+        .registerTypeAdapter(ArcheType::class.java, JsonDeserializer<ArcheType?> { json, _, _ -> ArcheType(json.asString) })
+        .registerTypeAdapter(Deck.DeckListener::class.java, InstanceCreator<Deck.DeckListener<T>?> { null })
         .create()
         .fromJson(this, object : TypeToken<T>() {}.type)
 } catch (e: Exception) {

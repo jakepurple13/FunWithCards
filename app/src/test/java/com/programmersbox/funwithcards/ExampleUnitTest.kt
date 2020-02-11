@@ -41,6 +41,47 @@ class ExampleUnitTest {
         //println(cards.joinToString("\n"))
     }
 
+    open class Rectangle {
+        open fun draw() = println("Rectangle's drawing")
+    }
+
+    interface Polygon {
+        fun draw() = println("Polygon's drawing") // interface members are 'open' by default
+    }
+
+    class Square : Rectangle(), Polygon {
+        // The compiler requires draw() to be overridden:
+        override fun draw() {
+            super<Rectangle>.draw() // call to Rectangle.draw()
+            super<Polygon>.draw() // call to Polygon.draw()
+        }
+    }
+
+    @Test
+    fun shapeTest() {
+        Square().draw()
+
+        val f = object {
+            val s = 0
+        }
+        println(f::class.java.simpleName)
+
+        fun makeObject() = object {
+            var g = 0
+            var s = "Hello"
+        }
+
+        println(makeObject())
+        println(makeObject().s)
+
+        /*fun asdf(v: ) {
+
+        }
+
+        asdf(f)*/
+
+    }
+
     private fun getCards() =
         File("/Users/jrein/Documents/FunWithCards/app/src/main/res/raw/cards.json").readText().fromJson<List<YugiohCard>>()!!
 
@@ -90,6 +131,13 @@ class ExampleUnitTest {
         println(deck[DeckType.MAIN].deck.joinToString { it.name })
         println(deck[DeckType.EXTRA].deck.joinToString { it.name })
         println(deck[DeckType.SIDE].deck.joinToString { it.name })
+        newLine()
+        println(deck[DeckType.MAIN].drawCards { it.type == TypeType.SPELL_CARD }.joinToString { it.name })
+        println(deck[DeckType.MAIN].deck.joinToString { it.name })
+
+        for (i in deck[DeckType.MAIN]) {
+            if (i !in deck[DeckType.EXTRA]) println(i.name)
+        }
     }
 
     private infix fun YugiohCard.into(deck: DeckType) = this to deck
@@ -120,6 +168,42 @@ class ExampleUnitTest {
 
     @Test
     fun other3() {
+
+        Deck.defaultDeck().apply {
+            isEmpty()
+            isNotEmpty()
+            findCard { true }
+            findCards { true }
+            size
+        }
+
+        Deck.DeckBuilder<Card> {
+            deckListener.onAdd {}
+            deckListener.onShuffle {}
+            deckListener.onDraw {}
+            card(4, Suit.SPADES)
+            card {
+                value = 4
+                suit = Suit.SPADES
+            }
+            shuffle()
+        }
+
+        Card.RandomCard.apply {
+            suit.apply {
+                symbol
+                unicodeSymbol
+                printableName
+            }
+            symbol
+            value
+            valueTen
+        }
+
+        Card.CardBuilder.cardBuilder {
+
+        }
+
         val cards = getCards()
         val deck = YugiohDeck().apply {
             this[DeckType.MAIN].addDeckListener {

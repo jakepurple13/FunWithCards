@@ -1,6 +1,5 @@
 package com.programmersbox.funwithcards.cards
 
-
 import kotlin.properties.Delegates
 import kotlin.random.Random
 
@@ -43,7 +42,7 @@ data class Card(val value: Int, val suit: Suit) {
     }
 }
 
-enum class Suit(private val printableName: String, val symbol: String, val unicodeSymbol: String) {
+enum class Suit(val printableName: String, val symbol: String, val unicodeSymbol: String) {
     HEARTS("Hearts", "H", "♥"),
     DIAMONDS("Diamonds", "D", "♦"),
     CLUBS("Clubs", "C", "♣"),
@@ -66,11 +65,14 @@ class Deck<T>(vararg cards: T) {
     private fun MutableList<T>.addCards(vararg card: T) = addAll(card).also { listener?.onAdd(card.toList()) }
     private fun MutableList<T>.addCards(card: Iterable<T>) = addAll(card).also { listener?.onAdd(card.toList()) }
     private fun MutableList<T>.drawCard(index: Int) = removeAt(index).also { listener?.onDraw(it) }
+    private fun MutableList<T>.removeCards(cards: Iterable<T>) = removeAll(cards).also { cards.forEach { c -> listener?.onDraw(c) } }
 
+    fun draw() = deckOfCards.drawCard(deckOfCards.lastIndex)
     fun addCard(vararg card: T) = deckOfCards.addCards(*card)
     fun addCards(card: Iterable<T>) = deckOfCards.addCards(card)
     fun findCard(predicate: (T) -> Boolean) = deckOfCards.find(predicate)
-    fun draw() = deckOfCards.drawCard(deckOfCards.lastIndex)
+    fun findCards(predicate: (T) -> Boolean) = deckOfCards.filter(predicate)
+    fun drawCards(predicate: (T) -> Boolean) = findCards(predicate).also { deckOfCards.removeCards(it) }
     fun shuffle() = deckOfCards.shuffle().also { listener?.onShuffle() }
     fun isEmpty() = deckOfCards.isEmpty()
     fun isNotEmpty() = deckOfCards.isNotEmpty()
@@ -80,7 +82,14 @@ class Deck<T>(vararg cards: T) {
     operator fun invoke(card: Iterable<T>) = deckOfCards.addCards(card)
     operator fun invoke(listener: DeckListenerBuilder<T>.() -> Unit) = addDeckListener(listener)
     operator fun get(index: Int) = deckOfCards[index]
-    fun remove(card: T) = deckOfCards.remove(card)
+    operator fun get(range: IntRange) = deck.subList(range.first, range.last)
+    operator fun set(index: Int, card: T) = deckOfCards.set(index, card)
+    operator fun minus(amount: Int) = mutableListOf<T>().apply { repeat(amount) { this += draw() } }.toList()
+    operator fun plusAssign(card: T) = addCard(card).let { Unit }
+    operator fun minusAssign(card: T) = remove(card).let { Unit }
+    operator fun iterator() = deckOfCards.iterator()
+    operator fun contains(card: T) = card in deckOfCards
+    fun remove(card: T) = deckOfCards.remove(card).also { if (it) listener?.onDraw(card) }
 
     companion object {
         fun defaultDeck() = Deck(*Suit.values().map { suit -> (1..13).map { value -> Card(value, suit) } }.flatten().toTypedArray())
@@ -117,7 +126,7 @@ class Deck<T>(vararg cards: T) {
             shuffleDeck = block
         }
 
-        private fun build() = object : DeckListener<T> {
+        internal fun build() = object : DeckListener<T> {
             override fun onAdd(cards: List<T>) = this@DeckListenerBuilder.addCards(cards)
             override fun onDraw(card: T) = drawCard(card)
             override fun onShuffle() = shuffleDeck()
@@ -132,26 +141,9 @@ class Deck<T>(vararg cards: T) {
 
     @DeckMarker
     class DeckBuilder<T> private constructor() {
-        private var drawCard: (T) -> Unit = {}
 
         @DeckMarker
-        fun onDraw(block: (T) -> Unit) {
-            drawCard = block
-        }
-
-        private var addCards: (List<T>) -> Unit = {}
-
-        @DeckMarker
-        fun onAdd(block: (List<T>) -> Unit) {
-            addCards = block
-        }
-
-        private var shuffleDeck: () -> Unit = {}
-
-        @DeckMarker
-        fun onShuffle(block: () -> Unit) {
-            shuffleDeck = block
-        }
+        val deckListener = DeckListenerBuilder<T>()
 
         private val cardList = mutableListOf<T>()
 
@@ -159,9 +151,11 @@ class Deck<T>(vararg cards: T) {
         val cards: List<T>
             get() = cardList
 
-        @DeckMarker
+        @Suppress("unused")
+        @CardMarker
         fun DeckBuilder<Card>.card(block: Card.CardBuilder.() -> Unit) = Card.CardBuilder(block).let { cardList.add(Card(it.value, it.suit)) }
 
+        @Suppress("unused")
         @CardMarker
         fun DeckBuilder<Card>.card(value: Int, suit: Suit) = cardList.add(Card(value, suit))
 
@@ -178,11 +172,7 @@ class Deck<T>(vararg cards: T) {
 
         private fun build() = Deck<T>().apply {
             addCards(cardList)
-            addDeckListener(object : DeckListener<T> {
-                override fun onAdd(cards: List<T>) = this@DeckBuilder.addCards(cards)
-                override fun onDraw(card: T) = drawCard(card)
-                override fun onShuffle() = shuffleDeck()
-            })
+            addDeckListener(deckListener.build())
         }
 
         companion object {
