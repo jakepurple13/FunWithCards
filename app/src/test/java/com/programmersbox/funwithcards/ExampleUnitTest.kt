@@ -94,6 +94,42 @@ class ExampleUnitTest {
     private fun <T> Collection<T>.random(predicate: (T) -> Boolean) = filter(predicate).random()
 
     @Test
+    fun other8() {
+        val cards = getCards()
+        val deck = YugiohDeck()
+        deck.addToDeck(*cards.takeRandom(5) { it.type in TypeType.deckTypes && !it.desc.contains("\n") }.toTypedArray(), deckType = DeckType.MAIN)
+        println(deck[DeckType.MAIN])
+        val json = deck[DeckType.MAIN].toDeckJson()
+        newLine()
+        println(json)
+        newLine()
+        println(json.toDeck<YugiohCard>())
+    }
+
+    @Test
+    fun other7() {
+        fun Deck<Card>.printDeck() = println(deck.joinToString { "${it.symbol}${it.suit.unicodeSymbol}" })
+        val deck = Deck.defaultDeck()
+        deck.printDeck()
+        deck.cut()
+        deck.printDeck()
+        newLine()
+        deck.cutShuffle(2)
+        deck.printDeck()
+        deck.draw(5)
+        (4..9).toDeck()
+        arrayOf(1, 2, 3).toDeck()
+        listOf(1, 2, 3).toDeck()
+        arrayOf(1, 2, 3).toDeck { onAdd { } }
+        listOf(1, 2, 3).toDeck { onAdd { } }
+
+        val f = deck.toDeckJson()
+        println(f)
+        val f1 = f.toDeck<Card>()
+        f1?.printDeck()
+    }
+
+    @Test
     fun other6() {
         val cards = getCards()
         val deck = YugiohDeck()
@@ -169,24 +205,38 @@ class ExampleUnitTest {
     @Test
     fun other3() {
 
-        Deck.defaultDeck().apply {
+        val d = Deck.defaultDeck().apply {
             isEmpty()
             isNotEmpty()
             findCard { true }
             findCards { true }
             size
+            remove(Card.RandomCard, Card.RandomCard)
         }
 
+        val d1 = 5..d
+        val d2 = d[2..5]
+        val d3 = -d
+        val d4 = d - 5
+        d += Card.RandomCard
+        d[5] = Card.RandomCard
+        d.addCard(5, Card.RandomCard)
+        d.addCard(
+            6 to Card.RandomCard,
+            7 to Card.RandomCard
+        )
+
         Deck.DeckBuilder<Card> {
-            deckListener.onAdd {}
-            deckListener.onShuffle {}
-            deckListener.onDraw {}
+            deckListener {
+                onAdd {}
+                onShuffle {}
+                onDraw {}
+            }
             card(4, Suit.SPADES)
             card {
                 value = 4
                 suit = Suit.SPADES
             }
-            shuffle()
         }
 
         Card.RandomCard.apply {
@@ -200,9 +250,7 @@ class ExampleUnitTest {
             valueTen
         }
 
-        Card.CardBuilder.cardBuilder {
-
-        }
+        Card.CardBuilder.cardBuilder {}
 
         val cards = getCards()
         val deck = YugiohDeck().apply {

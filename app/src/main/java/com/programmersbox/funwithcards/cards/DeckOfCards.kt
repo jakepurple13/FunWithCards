@@ -11,7 +11,7 @@ annotation class CardMarker
 
 data class Card(val value: Int, val suit: Suit) {
     val valueTen: Int get() = if (value > 10) 10 else value
-    val symbol: String = when (value) {
+    val symbol: String get() = when (value) {
         13 -> "K"
         12 -> "Q"
         11 -> "J"
@@ -43,31 +43,50 @@ data class Card(val value: Int, val suit: Suit) {
 }
 
 enum class Suit(val printableName: String, val symbol: String, val unicodeSymbol: String) {
-    HEARTS("Hearts", "H", "♥"),
-    DIAMONDS("Diamonds", "D", "♦"),
+    SPADES("Spades", "S", "♠"),
     CLUBS("Clubs", "C", "♣"),
-    SPADES("Spades", "S", "♠")
+    DIAMONDS("Diamonds", "D", "♦"),
+    HEARTS("Hearts", "H", "♥")
 }
 
-class Deck<T>(vararg cards: T) {
-    private val deckOfCards = mutableListOf(*cards)
+operator fun <T> Int.rangeTo(deck: Deck<T>) = deck.deck.subList(this, deck.size)
+fun <T> Iterable<T>.toDeck(listener: (Deck.DeckListenerBuilder<T>.() -> Unit)? = null) = Deck(this, listener)
+fun <T> Array<T>.toDeck(listener: (Deck.DeckListenerBuilder<T>.() -> Unit)? = null) = Deck(*this, listener)
+
+class Deck<T>(cards: Iterable<T> = emptyList()) {
+
+    constructor(vararg cards: T) : this(cards.toList())
+
+    constructor(vararg cards: T, listener: (DeckListenerBuilder<T>.() -> Unit)?) : this(cards.toList()) {
+        listener?.let(this::addDeckListener)
+    }
+
+    constructor(cards: Iterable<T>, listener: (DeckListenerBuilder<T>.() -> Unit)?) : this(cards) {
+        listener?.let(this::addDeckListener)
+    }
+
+    private val deckOfCards = cards.toMutableList()
+    private var listener: DeckListener<T>? = null
     val size: Int get() = deckOfCards.size
     val deck: List<T> get() = deckOfCards
-    private var listener: DeckListener<T>? = null
+
     fun addDeckListener(listener: DeckListener<T>) {
         this.listener = listener
     }
 
     fun addDeckListener(listener: DeckListenerBuilder<T>.() -> Unit) {
-        this.listener = DeckListenerBuilder.addListener(listener)
+        this.listener = DeckListenerBuilder.buildListener(listener)
     }
 
     private fun MutableList<T>.addCards(vararg card: T) = addAll(card).also { listener?.onAdd(card.toList()) }
     private fun MutableList<T>.addCards(card: Iterable<T>) = addAll(card).also { listener?.onAdd(card.toList()) }
-    private fun MutableList<T>.drawCard(index: Int) = removeAt(index).also { listener?.onDraw(it) }
+    private fun MutableList<T>.drawCard(index: Int = deckOfCards.lastIndex) = removeAt(index).also { listener?.onDraw(it) }
     private fun MutableList<T>.removeCards(cards: Iterable<T>) = removeAll(cards).also { cards.forEach { c -> listener?.onDraw(c) } }
 
-    fun draw() = deckOfCards.drawCard(deckOfCards.lastIndex)
+    fun draw() = deckOfCards.drawCard()
+    fun draw(amount: Int) = minus(amount)
+    fun addCard(index: Int, card: T) = deckOfCards.add(index, card).also { listener?.onAdd(listOf(card)) }
+    fun addCard(vararg cards: Pair<Int, T>) = cards.forEach { addCard(it.first, it.second) }
     fun addCard(vararg card: T) = deckOfCards.addCards(*card)
     fun addCards(card: Iterable<T>) = deckOfCards.addCards(card)
     fun findCard(predicate: (T) -> Boolean) = deckOfCards.find(predicate)
@@ -76,20 +95,48 @@ class Deck<T>(vararg cards: T) {
     fun shuffle() = deckOfCards.shuffle().also { listener?.onShuffle() }
     fun isEmpty() = deckOfCards.isEmpty()
     fun isNotEmpty() = deckOfCards.isNotEmpty()
-    override fun toString(): String = deckOfCards.toString()
+    fun remove(card: T) = deckOfCards.remove(card).also { if (it) listener?.onDraw(card) }
+    fun remove(vararg card: T) = deckOfCards.filter { it == card }.let { deckOfCards.removeCards(it) }
+    override fun toString(): String = deck.toString()
     operator fun invoke(deck: Deck<T>) = deckOfCards.addCards(deck.deckOfCards)
     operator fun invoke(vararg cards: T) = deckOfCards.addCards(*cards)
     operator fun invoke(card: Iterable<T>) = deckOfCards.addCards(card)
     operator fun invoke(listener: DeckListenerBuilder<T>.() -> Unit) = addDeckListener(listener)
-    operator fun get(index: Int) = deckOfCards[index]
+    operator fun get(index: Int) = deck[index]
     operator fun get(range: IntRange) = deck.subList(range.first, range.last)
-    operator fun set(index: Int, card: T) = deckOfCards.set(index, card)
     operator fun minus(amount: Int) = mutableListOf<T>().apply { repeat(amount) { this += draw() } }.toList()
+    operator fun set(index: Int, card: T) = deckOfCards.set(index, card)
     operator fun plusAssign(card: T) = addCard(card).let { Unit }
     operator fun minusAssign(card: T) = remove(card).let { Unit }
-    operator fun iterator() = deckOfCards.iterator()
-    operator fun contains(card: T) = card in deckOfCards
-    fun remove(card: T) = deckOfCards.remove(card).also { if (it) listener?.onDraw(card) }
+    operator fun unaryMinus() = draw()
+    operator fun iterator() = deck.iterator()
+    operator fun contains(card: T) = card in deck
+    operator fun divAssign(cuts: Int) = cutShuffle(cuts)
+
+    fun cutShuffle(cuts: Int = 2) {
+        val tempDeck = splitInto(cuts)
+        deckOfCards.clear()
+        deckOfCards.addAll(tempDeck.shuffled().flatMap(List<T>::shuffled))
+    }
+
+    fun cut() {
+        val (top, bottom) = split()
+        deckOfCards.clear()
+        deckOfCards.addAll(listOf(bottom, top).flatten())
+    }
+
+    private fun split() = deckOfCards.subList(0, size / 2).toList() to deckOfCards.subList(size / 2, size).toList()
+
+    private fun splitInto(cuts: Int): List<List<T>> {
+        val tempDeck = mutableMapOf<Int, MutableList<T>>().withDefault { mutableListOf() }
+        val cut = size / cuts
+        var count = 0
+        deckOfCards.forEach {
+            tempDeck[count] = tempDeck.getOrDefault(count, mutableListOf()).apply { add(it) }
+            if (tempDeck.getValue(count).count() >= cut) count++
+        }
+        return tempDeck.values.map(MutableList<T>::toList)
+    }
 
     companion object {
         fun defaultDeck() = Deck(*Suit.values().map { suit -> (1..13).map { value -> Card(value, suit) } }.flatten().toTypedArray())
@@ -134,7 +181,7 @@ class Deck<T>(vararg cards: T) {
 
         companion object {
             @DeckMarker
-            fun <T> addListener(block: DeckListenerBuilder<T>.() -> Unit): DeckListener<T> = DeckListenerBuilder<T>().apply(block).build()
+            fun <T> buildListener(block: DeckListenerBuilder<T>.() -> Unit): DeckListener<T> = DeckListenerBuilder<T>().apply(block).build()
         }
 
     }
@@ -142,8 +189,10 @@ class Deck<T>(vararg cards: T) {
     @DeckMarker
     class DeckBuilder<T> private constructor() {
 
+        private val deckListener = DeckListenerBuilder<T>()
+
         @DeckMarker
-        val deckListener = DeckListenerBuilder<T>()
+        fun deckListener(block: DeckListenerBuilder<T>.() -> Unit) = deckListener.apply(block)
 
         private val cardList = mutableListOf<T>()
 
@@ -167,8 +216,6 @@ class Deck<T>(vararg cards: T) {
 
         @CardMarker
         fun cards(cards: Iterable<T>) = cardList.addAll(cards)
-
-        fun shuffle() = cardList.shuffle()
 
         private fun build() = Deck<T>().apply {
             addCards(cardList)
