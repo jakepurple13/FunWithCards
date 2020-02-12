@@ -88,10 +88,8 @@ class ExampleUnitTest {
     private fun newLine(type: String = "") = println(type + "-----".repeat(10))
     private fun <T> Collection<T>.takeRandom(n: Int): List<T> = mutableListOf<T>().apply { repeat(n) { this += this@takeRandom.random() } }
 
-    private fun <T> Collection<T>.takeRandom(n: Int, predicate: (T) -> Boolean): List<T> =
+    private fun <T> Iterable<T>.takeRandom(n: Int, predicate: (T) -> Boolean): List<T> =
         filter(predicate).let { filtered -> mutableListOf<T>().apply { repeat(n) { this += filtered.random() } } }
-
-    private fun <T> Collection<T>.random(predicate: (T) -> Boolean) = filter(predicate).random()
 
     @Test
     fun other8() {
@@ -104,12 +102,21 @@ class ExampleUnitTest {
         println(json)
         newLine()
         println(json.toDeck<YugiohCard>())
+
+        deck[DeckType.MAIN].addDeckListener(object : Deck.DeckListener<YugiohCard> {
+            override fun onAdd(vararg cards: YugiohCard) = Unit
+            override fun onShuffle() = Unit
+            override fun onDraw(card: YugiohCard, size: Int) = Unit
+        })
     }
 
     @Test
     fun other7() {
         fun Deck<Card>.printDeck() = println(deck.joinToString { "${it.symbol}${it.suit.unicodeSymbol}" })
         val deck = Deck.defaultDeck()
+        deck {
+            onDraw { it, _ -> println("${it.symbol}${it.suit.unicodeSymbol}") }
+        }
         deck.printDeck()
         deck.cut()
         deck.printDeck()
@@ -118,15 +125,34 @@ class ExampleUnitTest {
         deck.printDeck()
         deck.draw(5)
         (4..9).toDeck()
-        arrayOf(1, 2, 3).toDeck()
+        arrayOf(1, 2, 3).toDeck() addCards listOf(1, 3, 4)
         listOf(1, 2, 3).toDeck()
-        arrayOf(1, 2, 3).toDeck { onAdd { } }
+        arrayOf(1, 2, 3).toDeck() addCards arrayOf(1, 2, 3)
         listOf(1, 2, 3).toDeck { onAdd { } }
 
         val f = deck.toDeckJson()
         println(f)
         val f1 = f.toDeck<Card>()
         f1?.printDeck()
+
+        println(deck.random())
+        println(deck.random { it.suit == Suit.SPADES })
+        val c = deck.randomDraw { it.suit == Suit.SPADES }
+        println(c)
+        println(deck.findCards { it == c })
+        //val c1 = deck.randomDraw { it.value == 14 }
+        //println(c1)
+
+        //val c2 = deck[85]
+        val c3 = deck findCardLocation Card.RandomCard
+        deck.sortDeck(compareBy { it.value })
+        deck.printDeck()
+        deck.sortDeckBy { it.suit }
+        deck.printDeck()
+        deck.trueRandomShuffle(1)
+        deck.printDeck()
+        deck.sortDeck(compareBy<Card> { it.suit }.thenBy { it.value })
+        deck.printDeck()
     }
 
     @Test
@@ -139,7 +165,7 @@ class ExampleUnitTest {
 
         deck[DeckType.MAIN].addDeckListener {
             onAdd { println("Adding ${it.map { it.name }} to Main") }
-            onDraw { println("I drew ${it.name}") }
+            onDraw { it, _ -> println("I drew ${it.name}") }
             onShuffle { Loged.f("Shuffling...") }
         }
 
@@ -156,6 +182,8 @@ class ExampleUnitTest {
             cards.random() to DeckType.MAIN,
             cards.random { it.type in TypeType.extraDeckTypes } to DeckType.EXTRA
         )
+
+        deck[DeckType.MAIN] add cards.random()
 
         cards.random() into DeckType.MAIN s deck
         cards.random() into deck s DeckType.MAIN
@@ -206,13 +234,14 @@ class ExampleUnitTest {
     fun other3() {
 
         val d = Deck.defaultDeck().apply {
-            isEmpty()
-            isNotEmpty()
-            findCard { true }
+            isEmpty
+            isNotEmpty
+            findCards { true }
             findCards { true }
             size
             remove(Card.RandomCard, Card.RandomCard)
         }
+        d.randomCard
 
         val d1 = 5..d
         val d2 = d[2..5]
@@ -220,6 +249,7 @@ class ExampleUnitTest {
         val d4 = d - 5
         d += Card.RandomCard
         d[5] = Card.RandomCard
+        d.addCard(Card.RandomCard, Card.RandomCard)
         d.addCard(5, Card.RandomCard)
         d.addCard(
             6 to Card.RandomCard,
@@ -230,13 +260,14 @@ class ExampleUnitTest {
             deckListener {
                 onAdd {}
                 onShuffle {}
-                onDraw {}
+                onDraw { _, _ -> }
             }
             card(4, Suit.SPADES)
             card {
                 value = 4
                 suit = Suit.SPADES
             }
+            card(2 to Suit.SPADES)
         }
 
         Card.RandomCard.apply {
@@ -255,7 +286,7 @@ class ExampleUnitTest {
         val cards = getCards()
         val deck = YugiohDeck().apply {
             this[DeckType.MAIN].addDeckListener {
-                onDraw { println("I draw ${it.name}") }
+                onDraw { it, _ -> println("I draw ${it.name}") }
                 onShuffle { println("Shuffling") }
             }
         }

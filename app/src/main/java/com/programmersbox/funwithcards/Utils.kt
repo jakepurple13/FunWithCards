@@ -43,6 +43,8 @@ inline fun <reified T> String?.fromJson(): T? = try {
     null
 }
 
+fun <T> Iterable<T>.random(predicate: (T) -> Boolean) = filter(predicate).random()
+
 fun <T : ViewGroup> T.animateChildren(transition: Transition? = AutoTransition(), block: T.() -> Unit) =
     TransitionManager.beginDelayedTransition(this, transition).apply { block() }
 
