@@ -92,6 +92,25 @@ class ExampleUnitTest {
         filter(predicate).let { filtered -> mutableListOf<T>().apply { repeat(n) { this += filtered.random() } } }
 
     @Test
+    fun other9() {
+        fun Deck<YugiohCard>.printDeck(separator: String = ", ") = println(deck.joinToString(separator = separator)
+        { "Card(${it.name}, ${it.atk}, ${it.def}, ${it.archetype}, ${it.attribute}, ${it.id}, ${it.race}, ${it.type})" })
+
+        val cards = getCards()
+        val deck = Deck(cards.takeRandom(50))
+        deck.printDeck()
+        newLine()
+        deck.sortDeck(compareBy { it.name })
+        deck.printDeck()
+        newLine()
+        deck.sortDeck(compareBy<YugiohCard> { it.atk }.thenBy { it.name })
+        deck.printDeck()
+        newLine()
+        deck.sortDeck(compareBy<YugiohCard> { it.type }.thenBy { it.attribute }.thenBy { it.race }.thenBy { it.level }.thenBy { it.name })
+        deck.printDeck("\n")
+    }
+
+    @Test
     fun other8() {
         val cards = getCards()
         val deck = YugiohDeck()
@@ -142,7 +161,7 @@ class ExampleUnitTest {
         println(deck.findCards { it == c })
         //val c1 = deck.randomDraw { it.value == 14 }
         //println(c1)
-
+        newLine()
         //val c2 = deck[85]
         val c3 = deck findCardLocation Card.RandomCard
         deck.sortDeck(compareBy { it.value })
@@ -151,8 +170,28 @@ class ExampleUnitTest {
         deck.printDeck()
         deck.trueRandomShuffle(1)
         deck.printDeck()
+        deck.sortDeck(compareBy<Card> { it.value }.thenBy { it.color })
+        deck.printDeck()
         deck.sortDeck(compareBy<Card> { it.suit }.thenBy { it.value })
         deck.printDeck()
+        newLine()
+        val deck2 = Deck.defaultDeck()
+        println(deck2.deck.reduce { acc, card -> Card(acc.value + card.value, card.suit) })
+        println(deck2.deck.fold(Card(-364, Suit.SPADES)) { acc, card -> Card(acc.value + card.value, card.suit) })
+        deck2 addDeck deck
+        deck2.randomCard
+        deck2.firstCard
+        deck2.middleCard
+        deck2.lastCard
+        deck2.getCards(deck2.randomCard)
+        deck2[deck2.randomCard]
+        deck2.clear()
+        deck2.reverse()
+        val listener = Deck.DeckListenerBuilder<Card> {
+            onDraw { card, i -> }
+        }
+        deck2.addDeckListener(listener)
+        val deck3 = Deck + Card.RandomCard
     }
 
     @Test

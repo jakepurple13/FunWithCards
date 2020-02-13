@@ -1,0 +1,11 @@
+//This does what the chunked method does
+fun splitInto(cuts: Int): List<List<T>> {
+    val tempDeck = mutableMapOf<Int, MutableList<T>>().withDefault { mutableListOf() }
+    val cut = size / cuts
+    var count = 0
+    deckOfCards.forEach {
+        tempDeck[count] = tempDeck.getOrDefault(count, mutableListOf()).apply { add(it) }
+        if (tempDeck.getValue(count).count() >= cut) count++
+    }
+    return tempDeck.values.map(MutableList<T>::toList)
+}

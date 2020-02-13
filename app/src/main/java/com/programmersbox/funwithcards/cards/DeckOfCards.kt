@@ -9,8 +9,14 @@ annotation class DeckMarker
 @DslMarker
 annotation class CardMarker
 
+enum class CardColor { BLACK, RED }
 data class Card(val value: Int, val suit: Suit) {
     val valueTen: Int get() = if (value > 10) 10 else value
+    val color: CardColor
+        get() = when (suit) {
+            Suit.SPADES, Suit.CLUBS -> CardColor.BLACK
+            Suit.HEARTS, Suit.DIAMONDS -> CardColor.RED
+        }
     val symbol: String
         get() = when (value) {
             13 -> "K"
@@ -24,13 +30,14 @@ data class Card(val value: Int, val suit: Suit) {
     class CardBuilder {
         var value by Delegates.notNull<Int>()
         var suit by Delegates.notNull<Suit>()
+        private fun build() = Card(value, suit)
 
         companion object {
             @CardMarker
             operator fun invoke(block: CardBuilder.() -> Unit) = cardBuilder(block)
 
             @CardMarker
-            fun cardBuilder(block: CardBuilder.() -> Unit) = CardBuilder().apply(block).let { Card(it.value, it.suit) }
+            fun cardBuilder(block: CardBuilder.() -> Unit) = CardBuilder().apply(block).build()
         }
     }
 
@@ -54,6 +61,7 @@ operator fun <T> Int.rangeTo(deck: Deck<T>) = deck.deck.subList(this, deck.size)
 fun <T> Iterable<T>.toDeck(listener: (Deck.DeckListenerBuilder<T>.() -> Unit)? = null) = Deck(this, listener)
 fun <T> Array<T>.toDeck(listener: (Deck.DeckListenerBuilder<T>.() -> Unit)? = null) = Deck(this.toList(), listener)
 class DeckException(message: String?) : Exception(message)
+
 class Deck<T>(cards: Iterable<T> = emptyList()) {
 
     constructor(vararg cards: T) : this(cards.toList())
@@ -80,21 +88,38 @@ class Deck<T>(cards: Iterable<T> = emptyList()) {
      * A non immutable version of the deck
      */
     val deck: List<T> get() = deckOfCards
-
     /**
      * Checks if the deck is empty
      */
     val isEmpty get() = deckOfCards.isEmpty()
-
     /**
      * Checks if the deck is not empty
      */
     val isNotEmpty get() = deckOfCards.isNotEmpty()
-
     /**
      * Gets a random card
+     * # Does Not Draw #
+     * @throws DeckException if deck is empty
      */
-    val randomCard get() = randomDraw()
+    val randomCard get() = deckOfCards.random()
+    /**
+     * Gets the first card in the deck
+     *  # Does Not Draw #
+     * @throws DeckException if deck is empty
+     */
+    val firstCard get() = deckOfCards.first()
+    /**
+     * Gets the middle card in the deck
+     * # Does Not Draw #
+     * @throws DeckException if deck is empty
+     */
+    val middleCard get() = deckOfCards[size / 2]
+    /**
+     * Gets the last card in the deck
+     * # Does Not Draw #
+     * @throws DeckException if deck is empty
+     */
+    val lastCard get() = deckOfCards.last()
 
     /**
      * Add a listener to this deck!
@@ -111,7 +136,7 @@ class Deck<T>(cards: Iterable<T> = emptyList()) {
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun Iterable<T>.toArray() = Array(size) { i -> this.toList()[i] as Any } as Array<T>
+    private fun Iterable<T>.toArray() = Array(this.count()) { i -> this.toList()[i] as Any } as Array<T>
 
     private fun MutableList<T>.addCards(vararg card: T) = addAll(card).also { listener?.onAdd(*card) }
 
@@ -133,7 +158,7 @@ class Deck<T>(cards: Iterable<T> = emptyList()) {
      * @throws DeckException if the Deck is Empty
      */
     @Throws(DeckException::class)
-    infix fun draw(amount: Int) = minus(amount)
+    infix fun draw(amount: Int) = tryCatch("Deck is Empty") { mutableListOf<T>().apply { repeat(amount) { this += draw() } }.toList() }
 
     /**
      * Add [card] to the deck in the [index] location
@@ -156,6 +181,11 @@ class Deck<T>(cards: Iterable<T> = emptyList()) {
     infix fun add(card: T) = deckOfCards.addCards(card)
 
     /**
+     * Adds all cards from [otherDeck] to this deck
+     */
+    infix fun addDeck(otherDeck: Deck<T>) = deckOfCards.addCards(*otherDeck.deck.toArray())
+
+    /**
      * Add [cards] to the deck
      */
     infix fun addCards(cards: Iterable<T>) = cards.let { deckOfCards.addCards(*cards.toArray()) }
@@ -164,6 +194,11 @@ class Deck<T>(cards: Iterable<T> = emptyList()) {
      * Add [cards] to the deck
      */
     infix fun addCards(cards: Array<T>) = deckOfCards.addCards(*cards)
+
+    /**
+     * Gets cards from [cards]
+     */
+    fun getCards(vararg cards: T) = drawCards { it in cards }
 
     /**
      * Find cards that match the [predicate]
@@ -211,6 +246,16 @@ class Deck<T>(cards: Iterable<T> = emptyList()) {
     fun trueRandomShuffle(seed: Long? = null) = repeat(7) { shuffle(seed) }
 
     /**
+     * Completely clears the deck
+     */
+    fun clear() = deckOfCards.clear()
+
+    /**
+     * Reverses the order of the deck
+     */
+    fun reverse() = deckOfCards.reverse()
+
+    /**
      * Randomly gets a card
      * @throws DeckException if none of the cards match the [predicate]
      */
@@ -228,17 +273,17 @@ class Deck<T>(cards: Iterable<T> = emptyList()) {
     /**
      * Adds the cards from [deck] to this deck
      */
-    operator fun invoke(deck: Deck<T>) = deckOfCards.addCards(*deck.deckOfCards.toArray())
+    operator fun invoke(deck: Deck<T>) = addDeck(deck)
 
     /**
      * Adds cards to the deck
      */
-    operator fun invoke(vararg cards: T) = deckOfCards.addCards(*cards)
+    operator fun invoke(vararg cards: T) = addCard(*cards)
 
     /**
      * Adds cards to the deck
      */
-    operator fun invoke(card: Iterable<T>) = deckOfCards.addCards(*card.toArray())
+    operator fun invoke(card: Iterable<T>) = addCards(card)
 
     /**
      * Adds a [DeckListener] to the deck
@@ -257,14 +302,26 @@ class Deck<T>(cards: Iterable<T> = emptyList()) {
      * @throws DeckException if the [range] is outside the bounds of the deck
      */
     @Throws(DeckException::class)
-    operator fun get(range: IntRange) = tryCatch("Index: ${range.first} to ${range.last}, Size: $size") { deck.subList(range.first, range.last) }
+    operator fun get(range: IntRange) = tryCatch("Index: ${range.first} to ${range.last}, Size: $size") { deck.slice(range) }
+
+    /**
+     * Gets a list from the deck between [from] and [to]
+     * @throws DeckException if the range is outside the bounds of the deck
+     */
+    @Throws(DeckException::class)
+    operator fun get(from: Int, to: Int) = tryCatch("Index: $from to $to, Size: $size") { deck.subList(from, to) }
+
+    /**
+     * Gets cards from [cards]
+     */
+    operator fun get(vararg cards: T) = getCards(*cards)
 
     /**
      * Draws multiple Cards!
      * @throws DeckException if the Deck is Empty
      */
     @Throws(DeckException::class)
-    operator fun minus(amount: Int) = tryCatch("Deck is Empty") { mutableListOf<T>().apply { repeat(amount) { this += draw() } }.toList() }
+    operator fun minus(amount: Int) = draw(amount)
 
     /**
      * Sets [index] of the deck with [card]
@@ -327,17 +384,7 @@ class Deck<T>(cards: Iterable<T> = emptyList()) {
     }
 
     private fun split() = deckOfCards.subList(0, size / 2).toList() to deckOfCards.subList(size / 2, size).toList()
-
-    private fun splitInto(cuts: Int): List<List<T>> {
-        val tempDeck = mutableMapOf<Int, MutableList<T>>().withDefault { mutableListOf() }
-        val cut = size / cuts
-        var count = 0
-        deckOfCards.forEach {
-            tempDeck[count] = tempDeck.getOrDefault(count, mutableListOf()).apply { add(it) }
-            if (tempDeck.getValue(count).count() >= cut) count++
-        }
-        return tempDeck.values.map(MutableList<T>::toList)
-    }
+    private fun splitInto(cuts: Int) = deckOfCards.chunked(size / cuts)
 
     private fun <R, V> V.tryCatch(message: String?, block: (V) -> R) = try {
         block(this)
@@ -375,7 +422,7 @@ class Deck<T>(cards: Iterable<T> = emptyList()) {
     }
 
     @DeckMarker
-    class DeckListenerBuilder<T> internal constructor() {
+    class DeckListenerBuilder<T> private constructor() {
 
         private var drawCard: (T, Int) -> Unit = { _, _ -> }
 
@@ -407,13 +454,19 @@ class Deck<T>(cards: Iterable<T> = emptyList()) {
             shuffleDeck = block
         }
 
-        internal fun build() = object : DeckListener<T> {
+        private fun build() = object : DeckListener<T> {
             override fun onAdd(vararg cards: T) = this@DeckListenerBuilder.addCards(cards)
             override fun onDraw(card: T, size: Int) = drawCard(card, size)
             override fun onShuffle() = shuffleDeck()
         }
 
         companion object {
+            /**
+             * Build a listener for the deck
+             */
+            @DeckMarker
+            operator fun <T> invoke(block: DeckListenerBuilder<T>.() -> Unit) = buildListener(block)
+
             /**
              * Build a listener for the deck
              */
@@ -426,13 +479,15 @@ class Deck<T>(cards: Iterable<T> = emptyList()) {
     @DeckMarker
     class DeckBuilder<T> private constructor() {
 
-        private val deckListener = DeckListenerBuilder<T>()
+        private var deckListener: DeckListenerBuilder<T>.() -> Unit = {}
 
         /**
          * Set up the [DeckListener]
          */
         @DeckMarker
-        fun deckListener(block: DeckListenerBuilder<T>.() -> Unit) = deckListener.apply(block)
+        fun deckListener(block: DeckListenerBuilder<T>.() -> Unit) {
+            deckListener = block
+        }
 
         private val cardList = mutableListOf<T>()
 
@@ -482,7 +537,7 @@ class Deck<T>(cards: Iterable<T> = emptyList()) {
         @CardMarker
         fun cards(cards: Iterable<T>) = cardList.addAll(cards)
 
-        private fun build() = Deck(cardList, deckListener.build())
+        private fun build() = Deck(cardList, DeckListenerBuilder.buildListener(deckListener))
 
         companion object {
             /**
